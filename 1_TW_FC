@@ -1,1 +1,182 @@
+library(glmmTMB)
+library(DHARMa)
+library(MuMIn)
+library(tidyverse)
+setwd("/Users/yusukekuroki/Desktop/Eye_Tracking")
+dat1_bpp <- read.csv("RQ2_target_words.csv")
+dat1_bpp
+
+colnames(dat1_bpp)[colnames(dat1_bpp) == "AOI.selection"] <- "Condition" 
+colnames(dat1_bpp)[colnames(dat1_bpp) == "RECORDING_SESSION_LABEL"] <- "ID" 
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_LABEL"] <- "Item" 
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_SKIP"] <- "Skip"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_FIXATION_COUNT"] <- "FC"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_FIRST_FIXATION_DURATION"] <- "FFD"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_REGRESSION_PATH_DURATION"] <- "RPD"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_REREADING_TIME"] <- "RRT"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_REFIXATION_DURATION"] <- "RFD"
+
+
+
+dat1 <- dat1_bpp %>% 
+  mutate( 
+    Condition = relevel(as.factor(Condition), ref = "Neutral"),
+    ID = as.factor(ID), 
+    Item = as.factor(Item) 
+  )
+
+
+FC1C <- glmmTMB(
+   FC ~ Condition + (1 + Condition| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+ FC2C <- glmmTMB(
+   FC ~ Condition + (1 + Condition|| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC3C<- glmmTMB(
+   FC ~ Condition + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC4C <- glmmTMB(
+   FC~ Condition + (1 | ID),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC5C <- glmmTMB(
+   FC ~ Condition + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+anova(FC1C,FC2C,FC3C,FC4C,FC5C)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Data: dat1
+Models:
+FC4C: FC ~ Condition + (1 | ID), zi=~0, disp=~1
+FC5C: FC ~ Condition + (1 | Item), zi=~0, disp=~1
+FC3C: FC ~ Condition + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC2C: FC ~ Condition + (1 + Condition || ID) + (1 | Item), zi=~0, disp=~1
+FC1C: FC ~ Condition + (1 + Condition | ID) + (1 | Item), zi=~0, disp=~1
+     Df    AIC    BIC  logLik deviance   Chisq Chi Df Pr(>Chisq)    
+FC4C  5 3834.9 3858.6 -1912.4   3824.9                              
+FC5C  5 4003.9 4027.7 -1997.0   3993.9   0.000      0          1    
+FC3C  6 3814.6 3843.1 -1901.3   3802.6 191.308      1     <2e-16 ***
+FC2C  8 3734.5 3772.4 -1859.2   3718.5  84.141      2     <2e-16 ***
+FC1C 11                                             3               
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+summary(modelFC2C)
+summary(FC3C)
+
+FC1ER <- glmmTMB(
+   FC ~ ER + (1 + ER| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+ FC2ER <- glmmTMB(
+   FC ~ ER + (1 + ER|| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC3ER<- glmmTMB(
+   FC ~ ER + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC4ER <- glmmTMB(
+   FC~ ER + (1 | ID),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC5ER <- glmmTMB(
+   FC ~ ER + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+
+anova(FC1ER,FC2ER,FC3ER,FC4ER,FC5ER)
+
+FC1Valence <- glmmTMB(
+   FC ~ Valence + (1 + Valence| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+ FC2Valence <- glmmTMB(
+   FC ~ Valence + (1 + Valence|| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC3Valence<- glmmTMB(
+   FC ~ Valence + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC4Valence <- glmmTMB(
+   FC~ Valence + (1 | ID),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC5Valence <- glmmTMB(
+   FC ~ Valence + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+
+anova(FC1Valence,FC2Valence,FC3Valence,FC4Valence,FC5Valence)
+
+FC1Arousal <- glmmTMB(
+   FC ~ Arousal + (1 + Arousal| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+ FC2Arousal <- glmmTMB(
+   FC ~ Arousal + (1 + Arousal|| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC3Arousal<- glmmTMB(
+   FC ~ Arousal + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC4Arousal <- glmmTMB(
+   FC~ Arousal + (1 | ID),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC5Arousal <- glmmTMB(
+   FC ~ Arousal + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+
+anova(FC1Arousal,FC2Arousal,FC3Arousal,FC4Arousal,FC5Arousal)
 
