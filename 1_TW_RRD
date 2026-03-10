@@ -1,1 +1,243 @@
+library(lme4)
+library(lmerTest)
+library(dplyr)
+library(multcomp)
+library(MuMIn)
+library(simr)
 
+#Part 1:
+dat1$ReRead <- as.integer(dat1$RRT > 0)
+
+ReRead1C <- glmer(
+  ReRead ~ Condition + (1 + Condition| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReRead2C <- glmer(
+  ReRead ~ Condition + (1 + Condition|| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReRead3C <- glmer(
+  ReRead ~ Condition + (1 | ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReRead4C <- glmer(
+  ReRead ~ Condition + (1 | ID),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReRead5C <- glmer(
+  ReRead ~ Condition + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+anova(ReRead1C, ReRead2C, ReRead3C, ReRead4C,ReRead5C)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning messages:
+1: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  unable to evaluate scaled gradient
+2: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model failed to converge: degenerate  Hessian with 1 negative eigenvalues
+Data: dat1
+Models:
+ReRead4C: ReRead ~ Condition + (1 | ID)
+ReRead5C: ReRead ~ Condition + (1 | Item)
+ReRead3C: ReRead ~ Condition + (1 | ID) + (1 | Item)
+ReRead1C: ReRead ~ Condition + (1 + Condition | ID) + (1 | Item)
+ReRead2C: ReRead ~ Condition + (1 + Condition || ID) + (1 | Item)
+         npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)    
+ReRead4C    4 830.49 849.41 -411.25    822.49                         
+ReRead5C    4 861.51 880.43 -426.76    853.51  0.000  0               
+ReRead3C    5 824.14 847.78 -407.07    814.14 39.376  1  3.496e-10 ***
+ReRead1C   10 817.41 864.71 -398.71    797.41 16.721  5   0.005059 ** 
+ReRead2C   11 819.41 871.44 -398.71    797.41  0.000  1   0.999749    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(ReRead1C)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+ Family: binomial  ( logit )
+Formula: ReRead ~ Condition + (1 + Condition | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    817.4     864.7    -398.7     797.4       827 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.9074  0.2095  0.3176  0.4632  1.6493 
+
+Random effects:
+ Groups Name              Variance Std.Dev. Corr       
+ ID     (Intercept)       2.2398   1.4966              
+        ConditionNegative 1.8248   1.3508   -0.64      
+        ConditionPositive 1.6790   1.2958   -0.69  0.37
+ Item   (Intercept)       0.2639   0.5137              
+Number of obs: 837, groups:  ID, 48; Item, 18
+
+Fixed effects:
+                  Estimate Std. Error z value Pr(>|z|)    
+(Intercept)         1.6184     0.3766   4.297 1.73e-05 ***
+ConditionNegative   0.5808     0.5048   1.151     0.25    
+ConditionPositive  -0.1115     0.4628  -0.241     0.81    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+            (Intr) CndtnN
+ConditnNgtv -0.633       
+ConditnPstv -0.699  0.454
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Part 2:
+data2 <- dat1 %>%
+  filter((!is.na(RRT) & RRT > 0))
+
+data2$log_RRT <- log(data2$RRT)
+
+ReRead2aC <- lmer(
+  log_RRT ~ Condition + (1 + Condition| ID) + (1 | Item),
+  data = data2)
+
+ReRead2bC <- lmer(
+  log_RRT ~ Condition + (1 + Condition|| ID) + (1 | Item),
+  data = data2)
+
+ReRead2cC <- lmer(
+  log_RRT ~ Condition + (1 | ID) + (1 | Item),
+  data = data2)
+
+ReRead2dC <- lmer(
+  log_RRT ~ Condition + (1 | ID),
+  data = data2)
+
+ReRead2eC <- lmer(
+  log_RRT ~ Condition + (1 | Item),
+  data = data2)
+
+anova(ReRead2aC, ReRead2bC, ReRead2cC,ReRead2dC, ReRead2eC)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning messages:
+1: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  unable to evaluate scaled gradient
+2: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model failed to converge: degenerate  Hessian with 1 negative eigenvalues
+3: Model failed to converge with 1 negative eigenvalue: -9.6e-03 
+refitting model(s) with ML (instead of REML)
+Data: data2
+Models:
+ReRead2dC: log_RRT ~ Condition + (1 | ID)
+ReRead2eC: log_RRT ~ Condition + (1 | Item)
+ReRead2cC: log_RRT ~ Condition + (1 | ID) + (1 | Item)
+ReRead2aC: log_RRT ~ Condition + (1 + Condition | ID) + (1 | Item)
+ReRead2bC: log_RRT ~ Condition + (1 + Condition || ID) + (1 | Item)
+          npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)    
+ReRead2dC    5 1443.6 1466.0 -716.80    1433.6                         
+ReRead2eC    5 1516.9 1539.4 -753.47    1506.9  0.000  0               
+ReRead2cC    6 1442.5 1469.5 -715.27    1430.5 76.408  1  < 2.2e-16 ***
+ReRead2aC   11 1404.9 1454.3 -691.45    1382.9 47.632  5  4.223e-09 ***
+ReRead2bC   12 1406.9 1460.8 -691.45    1382.9  0.000  1          1    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(ReRead2aC)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_RRT ~ Condition + (1 + Condition | ID) + (1 | Item)
+   Data: data2
+
+REML criterion at convergence: 1391.8
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.8646 -0.6230  0.0833  0.6712  2.5740 
+
+Random effects:
+ Groups   Name              Variance Std.Dev. Corr       
+ ID       (Intercept)       0.18177  0.4263              
+          ConditionNegative 0.27603  0.5254   -0.50      
+          ConditionPositive 0.22777  0.4773   -0.47  0.44
+ Item     (Intercept)       0.01586  0.1259              
+ Residual                   0.36203  0.6017              
+Number of obs: 658, groups:  ID, 48; Item, 18
+
+Fixed effects:
+                  Estimate Std. Error       df t value Pr(>|t|)    
+(Intercept)        6.47084    0.09181 35.20181  70.480   <2e-16 ***
+ConditionNegative  0.02359    0.12129 31.16156   0.194    0.847    
+ConditionPositive  0.02930    0.11803 28.24081   0.248    0.806    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+            (Intr) CndtnN
+ConditnNgtv -0.627       
+ConditnPstv -0.613  0.483
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ReRead1ER <- glmer(
+  ReRead ~ ERs + (1 + ERs| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReRead2ER <- glmer(
+  ReRead ~ ERs + (1 + ERs|| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReRead3ER <- glmer(
+  ReRead ~ ERs + (1 | ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReRead4ER <- glmer(
+  ReRead ~ ERs + (1 | ID),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReRead5ER <- glmer(
+  ReRead ~ ERs + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+anova(ReRead1ER, ReRead2ER, ReRead3ER, ReRead4ER,ReRead5ER)
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Data: dat1
+Models:
+ReRead4ER: ReRead ~ ERs + (1 | ID)
+ReRead5ER: ReRead ~ ERs + (1 | Item)
+ReRead3ER: ReRead ~ ERs + (1 | ID) + (1 | Item)
+ReRead2ER: ReRead ~ ERs + (1 + ERs || ID) + (1 | Item)
+ReRead1ER: ReRead ~ ERs + (1 + ERs | ID) + (1 | Item)
+          npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+ReRead4ER    3 838.26 852.45 -416.13    832.26                          
+ReRead5ER    3 863.33 877.52 -428.67    857.33  0.0000  0               
+ReRead3ER    4 825.48 844.39 -408.74    817.48 39.8556  1  2.734e-10 ***
+ReRead2ER    5 818.19 841.84 -404.10    808.19  9.2817  1   0.002315 ** 
+ReRead1ER    6 816.60 844.98 -402.30    804.60  3.5935  1   0.058005 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
