@@ -268,6 +268,7 @@ FC1Valence <- glmmTMB(
 
 anova(FC1Valence,FC2Valence,FC3Valence,FC4Valence,FC5Valence)
 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Data: dat1
 Models:
 FC4Valence: FC ~ Valence + (1 | ID), zi=~0, disp=~1
@@ -281,6 +282,33 @@ FC5Valence  4 3569.8 3588.4 -1780.9   3561.8   0.0000      0    1.00000
 FC3Valence  5 3421.2 3444.4 -1705.6   3411.2 150.6439      1  < 2.2e-16 ***
 FC2Valence  6 3417.7 3445.6 -1702.9   3405.7   5.4535      1    0.01953 *  
 FC1Valence  7 3395.2 3427.6 -1690.6   3381.2  24.5603      1  7.202e-07 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(FC1Valence)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ Family: nbinom2  ( log )
+Formula:          FC ~ Valence + (1 + Valence | ID) + (1 | Item)
+Data: dat1
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   3395.2    3427.6   -1690.6    3381.2       756 
+
+Random effects:
+
+Conditional model:
+ Groups Name        Variance Std.Dev. Corr  
+ ID     (Intercept) 0.459429 0.67781        
+        Valence     0.008237 0.09076  -0.90 
+ Item   (Intercept) 0.015712 0.12535        
+Number of obs: 763, groups:  ID, 43; Item, 18
+
+Dispersion parameter for nbinom2 family (): 28.2 
+
+Conditional model:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) 1.347339   0.136414   9.877   <2e-16 ***
+Valence     0.007414   0.020217   0.367    0.714    
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
