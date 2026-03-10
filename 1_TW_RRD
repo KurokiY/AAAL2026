@@ -187,6 +187,7 @@ Correlation of Fixed Effects:
 ConditnNgtv -0.627       
 ConditnPstv -0.613  0.483
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Part1
 ReRead1ER <- glmer(
   ReRead ~ ERs + (1 + ERs| ID) + (1 | Item),
   data = dat1,
@@ -223,8 +224,6 @@ ReRead5ER <- glmer(
 )
 
 anova(ReRead1ER, ReRead2ER, ReRead3ER, ReRead4ER,ReRead5ER)
-
-
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Data: dat1
 Models:
@@ -239,5 +238,83 @@ ReRead5ER    3 863.33 877.52 -428.67    857.33  0.0000  0
 ReRead3ER    4 825.48 844.39 -408.74    817.48 39.8556  1  2.734e-10 ***
 ReRead2ER    5 818.19 841.84 -404.10    808.19  9.2817  1   0.002315 ** 
 ReRead1ER    6 816.60 844.98 -402.30    804.60  3.5935  1   0.058005 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(ReRead1ER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+ Family: binomial  ( logit )
+Formula: ReRead ~ ERs + (1 + ERs | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    816.6     845.0    -402.3     804.6       831 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.6242  0.1673  0.3463  0.4912  1.5243 
+
+Random effects:
+ Groups Name        Variance Std.Dev. Corr 
+ ID     (Intercept) 1.0863   1.0422        
+        ERs         0.5604   0.7486   -0.59
+ Item   (Intercept) 0.4469   0.6685        
+Number of obs: 837, groups:  ID, 48; Item, 18
+
+Fixed effects:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  1.73762    0.25195   6.897 5.32e-12 ***
+ERs          0.05251    0.21004   0.250    0.803    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+    (Intr)
+ERs -0.191
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Part 2:
+data2 <- dat1 %>%
+  filter((!is.na(RRT) & RRT > 0))
+
+data2$log_RRT <- log(data2$RRT)
+
+ReRead2aER <- lmer(
+  log_RRT ~ ERs + (1 + ERs| ID) + (1 | Item),
+  data = data2)
+
+ReRead2bER <- lmer(
+  log_RRT ~ ERs + (1 + ERs|| ID) + (1 | Item),
+  data = data2)
+
+ReRead2cER <- lmer(
+  log_RRT ~ ERs + (1 | ID) + (1 | Item),
+  data = data2)
+
+ReRead2dER <- lmer(
+  log_RRT ~ ERs + (1 | ID),
+  data = data2)
+
+ReRead2eER <- lmer(
+  log_RRT ~ ERs + (1 | Item),
+  data = data2)
+
+anova(ReRead2aER, ReRead2bER, ReRead2cER,ReRead2dER, ReRead2eER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+refitting model(s) with ML (instead of REML)
+Data: data2
+Models:
+ReRead2dER: log_RRT ~ ERs + (1 | ID)
+ReRead2eER: log_RRT ~ ERs + (1 | Item)
+ReRead2cER: log_RRT ~ ERs + (1 | ID) + (1 | Item)
+ReRead2bER: log_RRT ~ ERs + (1 + ERs || ID) + (1 | Item)
+ReRead2aER: log_RRT ~ ERs + (1 + ERs | ID) + (1 | Item)
+           npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+ReRead2dER    4 1439.8 1457.8 -715.91    1431.8                          
+ReRead2eER    4 1510.3 1528.3 -751.16    1502.3  0.0000  0               
+ReRead2cER    5 1437.6 1460.1 -713.82    1427.6 74.6946  1  < 2.2e-16 ***
+ReRead2bER    6 1394.8 1421.7 -691.39    1382.8 44.8643  1  2.112e-11 ***
+ReRead2aER    7 1396.5 1427.9 -691.24    1382.5  0.2909  1     0.5896    
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
