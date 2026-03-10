@@ -16,8 +16,6 @@ colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_REGRESSION_PATH_DURATION"] <- "RPD"
 colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_REREADING_TIME"] <- "RRT"
 colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_REFIXATION_DURATION"] <- "RFD"
 
-
-
 dat1 <- dat1_bpp %>% 
   mutate( 
     Condition = relevel(as.factor(Condition), ref = "Neutral"),
@@ -25,6 +23,7 @@ dat1 <- dat1_bpp %>%
     Item = as.factor(Item) 
   )
 
+dat1$ERs<-scale(dat1$ER)
 
 FC1C <- glmmTMB(
    FC ~ Condition + (1 + Condition| ID) + (1 | Item),
@@ -134,19 +133,19 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 
 
 FC1ER <- glmmTMB(
-   FC ~ ER + (1 + ER| ID) + (1 | Item),
+   FC ~ ERs + (1 + ERs| ID) + (1 | Item),
    data = dat1,
    family = nbinom2(link = "log")
  )
 
  FC2ER <- glmmTMB(
-   FC ~ ER + (1 + ER|| ID) + (1 | Item),
+   FC ~ ERs + (1 + ERs|| ID) + (1 | Item),
    data = dat1,
    family = nbinom2(link = "log")
  )
  
  FC3ER<- glmmTMB(
-   FC ~ ER + (1 | ID) + (1 | Item),
+   FC ~ ERs + (1 | ID) + (1 | Item),
    data = dat1,
    family = nbinom2(link = "log")
  )
@@ -170,15 +169,15 @@ Data: dat1
 Models:
 FC4ER: FC ~ ER + (1 | ID), zi=~0, disp=~1
 FC5ER: FC ~ ER + (1 | Item), zi=~0, disp=~1
-FC3ER: FC ~ ER + (1 | ID) + (1 | Item), zi=~0, disp=~1
-FC2ER: FC ~ ER + (1 + ER || ID) + (1 | Item), zi=~0, disp=~1
-FC1ER: FC ~ ER + (1 + ER | ID) + (1 | Item), zi=~0, disp=~1
+FC3ER: FC ~ ERs + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC2ER: FC ~ ERs + (1 + ERs || ID) + (1 | Item), zi=~0, disp=~1
+FC1ER: FC ~ ERs + (1 + ERs | ID) + (1 | Item), zi=~0, disp=~1
       Df    AIC    BIC  logLik deviance    Chisq Chi Df Pr(>Chisq)    
 FC4ER  4 3837.8 3856.8 -1914.9   3829.8                               
-FC5ER  4 3999.1 4018.0 -1995.5   3991.1   0.0000      0    1.00000    
+FC5ER  4 3999.1 4018.0 -1995.5   3991.1   0.0000      0     1.0000    
 FC3ER  5 3809.9 3833.6 -1900.0   3799.9 191.1552      1  < 2.2e-16 ***
-FC2ER  6 3766.8 3795.3 -1877.4   3754.8  45.1230      1   1.85e-11 ***
-FC1ER  7 3764.7 3797.9 -1875.4   3750.7   4.0556      1    0.04403 *  
+FC2ER  6 3764.4 3792.9 -1876.2   3752.4  47.4753      1   5.57e-12 ***
+FC1ER  7 3764.7 3797.9 -1875.4   3750.7   1.7033      1     0.1919    
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -186,7 +185,7 @@ summary(FC1ER)
 summary(FC2ER)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  Family: nbinom2  ( log )
-Formula:          FC ~ ER + (1 + ER | ID) + (1 | Item)
+Formula:          FC ~ ERs + (1 + ERs | ID) + (1 | Item)
 Data: dat1
 
       AIC       BIC    logLik -2*log(L)  df.resid 
@@ -195,42 +194,42 @@ Data: dat1
 Random effects:
 
 Conditional model:
- Groups Name        Variance  Std.Dev. Corr  
- ID     (Intercept) 1.297e-01 0.360144       
-        ER          1.111e-05 0.003334 -0.40 
- Item   (Intercept) 2.493e-02 0.157905       
+ Groups Name        Variance Std.Dev. Corr  
+ ID     (Intercept) 0.11734  0.3426         
+        ERs         0.03707  0.1925   -0.26 
+ Item   (Intercept) 0.02493  0.1579         
 Number of obs: 848, groups:  ID, 48; Item, 18
 
 Dispersion parameter for nbinom2 family (): 47.5 
 
 Conditional model:
-             Estimate Std. Error z value Pr(>|z|)    
-(Intercept) 1.3888429  0.0680453  20.411   <2e-16 ***
-ER          0.0011331  0.0007873   1.439     0.15    
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  1.40686    0.06507  21.621   <2e-16 ***
+ERs          0.06544    0.04547   1.439     0.15    
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
  Family: nbinom2  ( log )
-Formula:          FC ~ ER + (1 + ER || ID) + (1 | Item)
+Formula:          FC ~ ERs + (1 + ERs || ID) + (1 | Item)
 Data: dat1
 
       AIC       BIC    logLik -2*log(L)  df.resid 
-   3766.8    3795.3   -1877.4    3754.8       842 
+   3764.4    3792.9   -1876.2    3752.4       842 
 
 Random effects:
 
 Conditional model:
- Groups Name        Variance  Std.Dev.
- ID     (Intercept) 1.198e-01 0.346134
-        ER          9.840e-06 0.003137
- Item   (Intercept) 2.523e-02 0.158836
+ Groups Name        Variance Std.Dev.
+ ID     (Intercept) 0.11541  0.3397  
+        ERs         0.03547  0.1883  
+ Item   (Intercept) 0.02513  0.1585  
 Number of obs: 848, groups:  ID, 48; Item, 18
 
-Dispersion parameter for nbinom2 family (): 45.2 
+Dispersion parameter for nbinom2 family (): 46.6 
 
 Conditional model:
-             Estimate Std. Error z value Pr(>|z|)    
-(Intercept) 1.3930463  0.0664241  20.972   <2e-16 ***
-ER          0.0009283  0.0007605   1.221    0.222    
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  1.40708    0.06480  21.713   <2e-16 ***
+ERs          0.05792    0.04476   1.294    0.196    
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
