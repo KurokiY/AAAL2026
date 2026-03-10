@@ -708,3 +708,226 @@ Correlation of Fixed Effects:
         (Intr)
 Valence -0.843
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Part 1:
+ReFixate1Arousal <- glmer(
+  ReFixate ~ Arousal + (1 + Arousal| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate2Arousal <- glmer(
+  ReFixate ~ Arousal + (1 + Arousal|| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate3Arousal <- glmer(
+  ReFixate ~ Arousal + (1 | ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate4Arousal <- glmer(
+  ReFixate ~ Arousal + (1 | ID),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate5Arousal <- glmer(
+  ReFixate ~ Arousal + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+anova(ReFixate1Arousal, ReFixate2Arousal, ReFixate3Arousal, ReFixate4Arousal, ReFixate5Arousal)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+boundary (singular) fit: see help('isSingular')
+Data: dat1
+Models:
+ReFixate4Arousal: ReFixate ~ Arousal + (1 | ID)
+ReFixate5Arousal: ReFixate ~ Arousal + (1 | Item)
+ReFixate3Arousal: ReFixate ~ Arousal + (1 | ID) + (1 | Item)
+ReFixate2Arousal: ReFixate ~ Arousal + (1 + Arousal || ID) + (1 | Item)
+ReFixate1Arousal: ReFixate ~ Arousal + (1 + Arousal | ID) + (1 | Item)
+                 npar     AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+ReFixate4Arousal    3 1003.75 1017.6 -498.88    997.75                          
+ReFixate5Arousal    3 1002.29 1016.2 -498.14    996.29  1.4640  0               
+ReFixate3Arousal    4  990.34 1008.8 -491.17    982.34 13.9459  1  0.0001882 ***
+ReFixate2Arousal    5  992.34 1015.5 -491.17    982.34  0.0000  1  1.0000000    
+ReFixate1Arousal    6  993.41 1021.2 -490.71    981.41  0.9264  1  0.3357883    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(ReFixate1Arousal)
+summary(ReFixate3Arousal)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+ Family: binomial  ( logit )
+Formula: ReFixate ~ Arousal + (1 + Arousal | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    993.4    1021.2    -490.7     981.4       747 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.7582 -0.7559 -0.5754  0.9907  2.0204 
+
+Random effects:
+ Groups Name        Variance Std.Dev. Corr 
+ ID     (Intercept) 0.91511  0.9566        
+        Arousal     0.01222  0.1106   -0.86
+ Item   (Intercept) 0.21795  0.4669        
+Number of obs: 753, groups:  ID, 43; Item, 18
+
+Fixed effects:
+             Estimate Std. Error z value Pr(>|z|)
+(Intercept) -0.529115   0.325413  -1.626    0.104
+Arousal      0.007708   0.050984   0.151    0.880
+
+Correlation of Fixed Effects:
+        (Intr)
+Arousal -0.871
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+ Family: binomial  ( logit )
+Formula: ReFixate ~ Arousal + (1 | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    990.3    1008.8    -491.2     982.3       749 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.5777 -0.7629 -0.5754  1.0197  2.1880 
+
+Random effects:
+ Groups Name        Variance Std.Dev.
+ ID     (Intercept) 0.2973   0.5452  
+ Item   (Intercept) 0.2135   0.4621  
+Number of obs: 753, groups:  ID, 43; Item, 18
+
+Fixed effects:
+             Estimate Std. Error z value Pr(>|z|)  
+(Intercept) -0.496545   0.283312  -1.753   0.0797 .
+Arousal      0.002866   0.045547   0.063   0.9498  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Arousal -0.829
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Part 2:
+dat1$ReFixate <- as.integer(dat1$RFD > 0)
+data2 <- dat1 %>%
+  filter((!is.na(RFD) & RFD > 0))
+data2$log_RFD <- log(data2$RFD+1)
+
+ReFixate2aArousal <- lmer(
+  log_RFD ~ Arousal + (1 + Arousal| ID) + (1 | Item),
+  data = data2)
+
+ReFixate2bArousal <- lmer(
+  log_RFD ~ Arousal + (1 + Arousal|| ID) + (1 | Item),
+  data = data2)
+
+ReFixate2cArousal <- lmer(
+  log_RFD ~ Arousal + (1 | ID) + (1 | Item),
+  data = data2)
+
+ReFixate2dArousal <- lmer(
+  log_RFD ~ Arousal + (1 | ID),
+  data = data2)
+
+ReFixate2eArousal <- lmer(
+  log_RFD ~ Arousal + (1 | Item),
+  data = data2)
+
+anova(ReFixate2aArousal, ReFixate2bArousal, ReFixate2cArousal, ReFixate2dArousal, ReFixate2eArousal)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+boundary (singular) fit: see help('isSingular')
+refitting model(s) with ML (instead of REML)
+Data: data2
+Models:
+ReFixate2dArousal: log_RFD ~ Arousal + (1 | ID)
+ReFixate2eArousal: log_RFD ~ Arousal + (1 | Item)
+ReFixate2cArousal: log_RFD ~ Arousal + (1 | ID) + (1 | Item)
+ReFixate2bArousal: log_RFD ~ Arousal + (1 + Arousal || ID) + (1 | Item)
+ReFixate2aArousal: log_RFD ~ Arousal + (1 + Arousal | ID) + (1 | Item)
+                  npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+ReFixate2dArousal    4 593.16 607.92 -292.58    585.16                          
+ReFixate2eArousal    4 610.89 625.65 -301.45    602.89  0.0000  0               
+ReFixate2cArousal    5 590.11 608.56 -290.05    580.11 22.7844  1  1.812e-06 ***
+ReFixate2bArousal    6 591.59 613.73 -289.79    579.59  0.5224  1     0.4698    
+ReFixate2aArousal    7 593.34 619.17 -289.67    579.34  0.2500  1     0.6171    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(ReFixate2aArousal)
+summary(ReFixate2cArousal)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_RFD ~ Arousal + (1 + Arousal | ID) + (1 | Item)
+   Data: data2
+
+REML criterion at convergence: 588.6
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.3472 -0.6423 -0.1766  0.5750  2.6081 
+
+Random effects:
+ Groups   Name        Variance  Std.Dev. Corr
+ ID       (Intercept) 0.0357159 0.18899      
+          Arousal     0.0005404 0.02325  1.00
+ Item     (Intercept) 0.0217724 0.14755      
+ Residual             0.3452759 0.58760      
+Number of obs: 296, groups:  ID, 43; Item, 18
+
+Fixed effects:
+             Estimate Std. Error        df t value Pr(>|t|)    
+(Intercept)   5.49088    0.12613  45.03978  43.533   <2e-16 ***
+Arousal       0.03090    0.02236 224.52992   1.381    0.169    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Arousal -0.838
+optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')
+
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_RFD ~ Arousal + (1 | ID) + (1 | Item)
+   Data: data2
+
+REML criterion at convergence: 589.3
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.3117 -0.6482 -0.1549  0.5805  2.6089 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ ID       (Intercept) 0.09948  0.3154  
+ Item     (Intercept) 0.02125  0.1458  
+ Residual             0.34549  0.5878  
+Number of obs: 296, groups:  ID, 43; Item, 18
+
+Fixed effects:
+             Estimate Std. Error        df t value Pr(>|t|)    
+(Intercept)   5.50054    0.13711 133.45920  40.118   <2e-16 ***
+Arousal       0.02958    0.02278 225.42277   1.299    0.195    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Arousal -0.860
