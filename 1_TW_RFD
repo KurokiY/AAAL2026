@@ -1,1 +1,64 @@
+library(lme4)
+library(lmerTest)
+library(dplyr)
+library(multcomp)
+library(MuMIn)
+library(simr)
 
+#Part 1:
+dat1$ReFixate <- as.integer(dat1$RFD > 0)
+
+ReFixate1C <- glmer(
+  ReFixate ~ Condition + (1 + Condition| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate2C <- glmer(
+  ReFixate ~ Condition + (1 + Condition|| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate3C <- glmer(
+  ReFixate ~ Condition + (1 | ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate4C <- glmer(
+  ReFixate ~ Condition + (1 | ID),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate5C <- glmer(
+  ReFixate ~ Condition + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+anova(ReFixate1C, ReFixate2C, ReFixate3C, ReFixate4C, ReFixate5C)
+
+boundary (singular) fit: see help('isSingular')
+boundary (singular) fit: see help('isSingular')
+Data: dat1
+Models:
+ReFixate4C: ReFixate ~ Condition + (1 | ID)
+ReFixate5C: ReFixate ~ Condition + (1 | Item)
+ReFixate3C: ReFixate ~ Condition + (1 | ID) + (1 | Item)
+ReFixate1C: ReFixate ~ Condition + (1 + Condition | ID) + (1 | Item)
+ReFixate2C: ReFixate ~ Condition + (1 + Condition || ID) + (1 | Item)
+           npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+ReFixate4C    4 1112.7 1131.7 -552.36    1104.7                          
+ReFixate5C    4 1106.7 1125.7 -549.37    1098.7  5.9954  0               
+ReFixate3C    5 1094.2 1117.9 -542.12    1084.2 14.4825  1  0.0001415 ***
+ReFixate1C   10 1097.8 1145.2 -538.92    1077.8  6.4006  5  0.2691677    
+ReFixate2C   11 1099.8 1151.9 -538.92    1077.8  0.0000  1  0.9983780    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
