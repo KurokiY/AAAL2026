@@ -154,23 +154,23 @@ ConditnNgtv -0.625
 ConditnPstv -0.625  0.500
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 FFD1ER <- lmer(
-  log_FFD ~ ER + (1 + ER| ID) + (1 | Item),
+  log_FFD ~ ERs + (1 + ERs| ID) + (1 | Item),
   data = dat1)
 
 FFD2ER <- lmer(
-  log_FFD ~ ER + (1 + ER| ID) + (1 | Item),
+  log_FFD ~ ERs + (1 + ERs| ID) + (1 | Item),
   data = dat1)
 
 FFD3ER <- lmer(
-  log_FFD ~ ER + (1 | ID) + (1 | Item),
+  log_FFD ~ ERs + (1 | ID) + (1 | Item),
   data = dat1)
 
 FFD4ER <- lmer(
-  log_FFD ~ ER + (1 | ID),
+  log_FFD ~ ERs + (1 | ID),
   data = dat1)
 
 FFD5ER <- lmer(
-  log_FFD ~ ER + (1 | Item),
+  log_FFD ~ ERs + (1 | Item),
   data = dat1)
 
 anova(FFD1ER, FFD2ER, FFD3ER, FFD4ER, FFD5ER)
