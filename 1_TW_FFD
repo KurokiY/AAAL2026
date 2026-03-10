@@ -175,14 +175,16 @@ FFD5ER <- lmer(
 
 anova(FFD1ER, FFD2ER, FFD3ER, FFD4ER, FFD5ER)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+boundary (singular) fit: see help('isSingular')
+boundary (singular) fit: see help('isSingular')
 refitting model(s) with ML (instead of REML)
 Data: dat1
 Models:
-FFD4ER: log_FFD ~ ER + (1 | ID)
-FFD5ER: log_FFD ~ ER + (1 | Item)
-FFD3ER: log_FFD ~ ER + (1 | ID) + (1 | Item)
-FFD1ER: log_FFD ~ ER + (1 + ER | ID) + (1 | Item)
-FFD2ER: log_FFD ~ ER + (1 + ER | ID) + (1 | Item)
+FFD4ER: log_FFD ~ ERs + (1 | ID)
+FFD5ER: log_FFD ~ ERs + (1 | Item)
+FFD3ER: log_FFD ~ ERs + (1 | ID) + (1 | Item)
+FFD1ER: log_FFD ~ ERs + (1 + ERs | ID) + (1 | Item)
+FFD2ER: log_FFD ~ ERs + (1 + ERs | ID) + (1 | Item)
        npar    AIC     BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
 FFD4ER    4 963.65  982.57 -477.82    955.65                          
 FFD5ER    4 983.08 1002.00 -487.54    975.08  0.0000  0               
@@ -197,76 +199,72 @@ summary(FFD2ER)
 summary(FFD3ER)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
-Formula: log_FFD ~ ER + (1 + ER | ID) + (1 | Item)
+Formula: log_FFD ~ ERs + (1 + ERs | ID) + (1 | Item)
    Data: dat1
 
-REML criterion at convergence: 984.6
+REML criterion at convergence: 965
 
 Scaled residuals: 
      Min       1Q   Median       3Q      Max 
--2.48973 -0.69934 -0.01042  0.61752  3.09343 
+-2.61795 -0.66829 -0.01681  0.61310  3.13506 
 
 Random effects:
- Groups   Name        Variance  Std.Dev.  Corr
- ID       (Intercept) 2.853e-03 0.0534159     
-          ER          2.708e-08 0.0001645 0.80
- Item     (Intercept) 4.822e-03 0.0694431     
- Residual             1.799e-01 0.4240940     
+ Groups   Name        Variance  Std.Dev. Corr 
+ ID       (Intercept) 1.406e-02 0.118556      
+          ERs         2.255e-05 0.004748 -1.00
+ Item     (Intercept) 2.659e-03 0.051566      
+ Residual             1.723e-01 0.415071      
 Number of obs: 837, groups:  ID, 48; Item, 18
 
 Fixed effects:
-              Estimate Std. Error         df t value Pr(>|t|)    
-(Intercept)  5.4540784  0.0238028 13.7024468 229.136   <2e-16 ***
-ER          -0.0004621  0.0003174 62.8880565  -1.456     0.15    
+            Estimate Std. Error       df t value Pr(>|t|)    
+(Intercept)  5.44727    0.02544 32.47213 214.126   <2e-16 ***
+ERs         -0.03080    0.01757 66.73040  -1.753   0.0842 .  
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Correlation of Fixed Effects:
-   (Intr)
-ER -0.185
+    (Intr)
+ERs -0.026
 optimizer (nloptwrap) convergence code: 0 (OK)
-Model failed to converge with max|grad| = 3.14751 (tol = 0.002, component 1)
-Model is nearly unidentifiable: very large eigenvalue
- - Rescale variables?
+boundary (singular) fit: see help('isSingular')
 
 Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
-Formula: log_FFD ~ ER + (1 + ER | ID) + (1 | Item)
+Formula: log_FFD ~ ERs + (1 + ERs | ID) + (1 | Item)
    Data: dat1
 
-REML criterion at convergence: 984.6
+REML criterion at convergence: 965
 
 Scaled residuals: 
      Min       1Q   Median       3Q      Max 
--2.48973 -0.69934 -0.01042  0.61752  3.09343 
+-2.61795 -0.66829 -0.01681  0.61310  3.13506 
 
 Random effects:
- Groups   Name        Variance  Std.Dev.  Corr
- ID       (Intercept) 2.853e-03 0.0534159     
-          ER          2.708e-08 0.0001645 0.80
- Item     (Intercept) 4.822e-03 0.0694431     
- Residual             1.799e-01 0.4240940     
+ Groups   Name        Variance  Std.Dev. Corr 
+ ID       (Intercept) 1.406e-02 0.118556      
+          ERs         2.255e-05 0.004748 -1.00
+ Item     (Intercept) 2.659e-03 0.051566      
+ Residual             1.723e-01 0.415071      
 Number of obs: 837, groups:  ID, 48; Item, 18
 
 Fixed effects:
-              Estimate Std. Error         df t value Pr(>|t|)    
-(Intercept)  5.4540784  0.0238028 13.7024468 229.136   <2e-16 ***
-ER          -0.0004621  0.0003174 62.8880565  -1.456     0.15    
+            Estimate Std. Error       df t value Pr(>|t|)    
+(Intercept)  5.44727    0.02544 32.47213 214.126   <2e-16 ***
+ERs         -0.03080    0.01757 66.73040  -1.753   0.0842 .  
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Correlation of Fixed Effects:
-   (Intr)
-ER -0.185
+    (Intr)
+ERs -0.026
 optimizer (nloptwrap) convergence code: 0 (OK)
-Model failed to converge with max|grad| = 3.14751 (tol = 0.002, component 1)
-Model is nearly unidentifiable: very large eigenvalue
- - Rescale variables?
+boundary (singular) fit: see help('isSingular')
 
 Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
-Formula: log_FFD ~ ER + (1 | ID) + (1 | Item)
+Formula: log_FFD ~ ERs + (1 | ID) + (1 | Item)
    Data: dat1
 
-REML criterion at convergence: 973.2
+REML criterion at convergence: 965.1
 
 Scaled residuals: 
      Min       1Q   Median       3Q      Max 
@@ -280,15 +278,15 @@ Random effects:
 Number of obs: 837, groups:  ID, 48; Item, 18
 
 Fixed effects:
-              Estimate Std. Error         df t value Pr(>|t|)    
-(Intercept)  5.4555618  0.0258847 33.4204375 210.764   <2e-16 ***
-ER          -0.0005356  0.0003040 66.9203646  -1.762   0.0826 .  
+            Estimate Std. Error       df t value Pr(>|t|)    
+(Intercept)  5.44704    0.02544 32.45073 214.092   <2e-16 ***
+ERs         -0.03094    0.01756 66.92036  -1.762   0.0826 .  
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Correlation of Fixed Effects:
-   (Intr)
-ER -0.184
+    (Intr)
+ERs 0.003 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 FFD1Valence <- lmer(
   log_FFD ~ Valence + (1 + Valence| ID) + (1 | Item),
