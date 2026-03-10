@@ -65,7 +65,7 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 summary(ReFixate1C)
 summary(ReFixate3C)
-
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
  Family: binomial  ( logit )
 Formula: ReFixate ~ Condition + (1 + Condition | ID) + (1 | Item)
@@ -248,4 +248,463 @@ Correlation of Fixed Effects:
             (Intr) CndtnN
 ConditnNgtv -0.635       
 ConditnPstv -0.634  0.514
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Part 1:
+ReFixate1ER <- glmer(
+  ReFixate ~ ERs + (1 + ERs| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate2ER <- glmer(
+  ReFixate ~ ERs + (1 + ERs|| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate3ER <- glmer(
+  ReFixate ~ ERs + (1 | ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate4ER <- glmer(
+  ReFixate ~ ERs + (1 | ID),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate5ER <- glmer(
+  ReFixate ~ ERs + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+anova(ReFixate1ER, ReFixate2ER, ReFixate3ER, ReFixate4ER, ReFixate5ER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+boundary (singular) fit: see help('isSingular')
+boundary (singular) fit: see help('isSingular')
+Data: dat1
+Models:
+ReFixate4ER: ReFixate ~ ERs + (1 | ID)
+ReFixate5ER: ReFixate ~ ERs + (1 | Item)
+ReFixate3ER: ReFixate ~ ERs + (1 | ID) + (1 | Item)
+ReFixate2ER: ReFixate ~ ERs + (1 + ERs || ID) + (1 | Item)
+ReFixate1ER: ReFixate ~ ERs + (1 + ERs | ID) + (1 | Item)
+            npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+ReFixate4ER    3 1110.7 1124.9 -552.36    1104.7                          
+ReFixate5ER    3 1104.1 1118.2 -549.03    1098.1  6.6540  0               
+ReFixate3ER    4 1091.9 1110.8 -541.95    1083.9 14.1633  1  0.0001676 ***
+ReFixate2ER    5 1093.9 1117.5 -541.95    1083.9  0.0000  1  1.0000000    
+ReFixate1ER    6 1094.7 1123.1 -541.35    1082.7  1.1909  1  0.2751515    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(ReFixate1ER)
+summary(ReFixate3ER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+ Family: binomial  ( logit )
+Formula: ReFixate ~ ERs + (1 + ERs | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   1094.7    1123.1    -541.4    1082.7       831 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.7639 -0.7450 -0.5701  0.9752  2.1856 
+
+Random effects:
+ Groups Name        Variance Std.Dev. Corr
+ ID     (Intercept) 0.29979  0.5475       
+        ERs         0.01417  0.1190   1.00
+ Item   (Intercept) 0.23805  0.4879       
+Number of obs: 837, groups:  ID, 48; Item, 18
+
+Fixed effects:
+            Estimate Std. Error z value Pr(>|z|)   
+(Intercept)  -0.5215     0.1591  -3.277  0.00105 **
+ERs           0.0642     0.1068   0.601  0.54781   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+    (Intr)
+ERs 0.092 
+optimizer (bobyqa) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')
+
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+ Family: binomial  ( logit )
+Formula: ReFixate ~ ERs + (1 | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   1091.9    1110.8    -542.0    1083.9       833 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.6858 -0.7574 -0.5751  1.0051  2.3594 
+
+Random effects:
+ Groups Name        Variance Std.Dev.
+ ID     (Intercept) 0.2830   0.5320  
+ Item   (Intercept) 0.2387   0.4886  
+Number of obs: 837, groups:  ID, 48; Item, 18
+
+Fixed effects:
+            Estimate Std. Error z value Pr(>|z|)   
+(Intercept) -0.51744    0.15791  -3.277  0.00105 **
+ERs          0.06445    0.10494   0.614  0.53915   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+    (Intr)
+ERs -0.005
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Part 2:
+dat1$ReFixate <- as.integer(dat1$RFD > 0)
+data2 <- dat1 %>%
+  filter((!is.na(RFD) & RFD > 0))
+
+data2$log_RFD <- log(data2$RFD+1)
+
+ReFixate2aER <- lmer(
+  log_RFD ~ ERs + (1 + ERs| ID) + (1 | Item),
+  data = data2)
+
+ReFixate2bER <- lmer(
+  log_RFD ~ ERs + (1 + ERs|| ID) + (1 | Item),
+  data = data2)
+
+ReFixate2cER <- lmer(
+  log_RFD ~ ERs + (1 | ID) + (1 | Item),
+  data = data2)
+
+ReFixate2dER <- lmer(
+  log_RFD ~ ERs + (1 | ID),
+  data = data2)
+
+ReFixate2eER <- lmer(
+  log_RFD ~ ERs + (1 | Item),
+  data = data2)
+
+anova(ReFixate2aER, ReFixate2bER, ReFixate2cER, ReFixate2dER, ReFixate2eER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+refitting model(s) with ML (instead of REML)
+Data: data2
+Models:
+ReFixate2dER: log_RFD ~ ERs + (1 | ID)
+ReFixate2eER: log_RFD ~ ERs + (1 | Item)
+ReFixate2cER: log_RFD ~ ERs + (1 | ID) + (1 | Item)
+ReFixate2bER: log_RFD ~ ERs + (1 + ERs || ID) + (1 | Item)
+ReFixate2aER: log_RFD ~ ERs + (1 + ERs | ID) + (1 | Item)
+             npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+ReFixate2dER    4 639.72 654.83 -315.86    631.72                          
+ReFixate2eER    4 660.37 675.48 -326.18    652.37  0.0000  0               
+ReFixate2cER    5 637.37 656.26 -313.68    627.37 24.9993  1  5.735e-07 ***
+ReFixate2bER    6 638.85 661.52 -313.43    626.85  0.5162  1     0.4725    
+ReFixate2aER    7 640.26 666.71 -313.13    626.26  0.5870  1     0.4436    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(ReFixate2aER)
+summary(ReFixate2cER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_RFD ~ ERs + (1 + ERs | ID) + (1 | Item)
+   Data: data2
+
+REML criterion at convergence: 634.1
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.2000 -0.6607 -0.1808  0.5938  2.6225 
+
+Random effects:
+ Groups   Name        Variance Std.Dev. Corr 
+ ID       (Intercept) 0.09250  0.3041        
+          ERs         0.01064  0.1032   -0.33
+ Item     (Intercept) 0.01857  0.1363        
+ Residual             0.33340  0.5774        
+Number of obs: 323, groups:  ID, 48; Item, 18
+
+Fixed effects:
+             Estimate Std. Error        df t value Pr(>|t|)    
+(Intercept)  5.642208   0.065140 32.593373  86.617   <2e-16 ***
+ERs         -0.009102   0.048717 31.974549  -0.187    0.853    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+    (Intr)
+ERs -0.090
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_RFD ~ ERs + (1 | ID) + (1 | Item)
+   Data: data2
+
+REML criterion at convergence: 635.4
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.2786 -0.6642 -0.1761  0.6139  2.6524 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ ID       (Intercept) 0.09406  0.3067  
+ Item     (Intercept) 0.01794  0.1339  
+ Residual             0.34209  0.5849  
+Number of obs: 323, groups:  ID, 48; Item, 18
+
+Fixed effects:
+            Estimate Std. Error       df t value Pr(>|t|)    
+(Intercept)  5.64086    0.06500 34.18736  86.776   <2e-16 ***
+ERs         -0.01781    0.04523 64.72678  -0.394    0.695    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+    (Intr)
+ERs -0.011
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Part 1:
+ReFixate1Valence <- glmer(
+  ReFixate ~ Valence + (1 + Valence| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate2Valence <- glmer(
+  ReFixate ~ Valence + (1 + Valence|| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate3Valence <- glmer(
+  ReFixate ~ Valence + (1 | ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate4Valence <- glmer(
+  ReFixate ~ Valence + (1 | ID),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+ReFixate5Valence <- glmer(
+  ReFixate ~ Valence + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+anova(ReFixate1Valence, ReFixate2Valence, ReFixate3Valence, ReFixate4Valence, ReFixate5Valence)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+boundary (singular) fit: see help('isSingular')
+Data: dat1
+Models:
+ReFixate4Valence: ReFixate ~ Valence + (1 | ID)
+ReFixate5Valence: ReFixate ~ Valence + (1 | Item)
+ReFixate3Valence: ReFixate ~ Valence + (1 | ID) + (1 | Item)
+ReFixate2Valence: ReFixate ~ Valence + (1 + Valence || ID) + (1 | Item)
+ReFixate1Valence: ReFixate ~ Valence + (1 + Valence | ID) + (1 | Item)
+                 npar     AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+ReFixate4Valence    3 1003.70 1017.6 -498.85    997.70                          
+ReFixate5Valence    3 1002.01 1015.9 -498.00    996.01  1.6945  0               
+ReFixate3Valence    4  990.20 1008.7 -491.10    982.20 13.8039  1  0.0002029 ***
+ReFixate2Valence    5  991.67 1014.8 -490.83    981.67  0.5325  1  0.4655492    
+ReFixate1Valence    6  993.29 1021.0 -490.65    981.29  0.3771  1  0.5391574    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(ReFixate1Valence)
+summary(ReFixate2Valence)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+ Family: binomial  ( logit )
+Formula: ReFixate ~ Valence + (1 + Valence | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    993.3    1021.0    -490.6     981.3       747 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.6599 -0.7627 -0.5743  1.0006  2.2668 
+
+Random effects:
+ Groups Name        Variance Std.Dev. Corr
+ ID     (Intercept) 0.092668 0.30441      
+        Valence     0.002173 0.04662  1.00
+ Item   (Intercept) 0.213780 0.46236      
+Number of obs: 753, groups:  ID, 43; Item, 18
+
+Fixed effects:
+            Estimate Std. Error z value Pr(>|z|)  
+(Intercept) -0.55559    0.28049  -1.981   0.0476 *
+Valence      0.01307    0.04624   0.283   0.7774  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Valence -0.825
+optimizer (bobyqa) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')
+
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+ Family: binomial  ( logit )
+Formula: ReFixate ~ Valence + (1 + Valence || ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    991.7    1014.8    -490.8     981.7       748 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.6498 -0.7660 -0.5769  0.9990  2.2400 
+
+Random effects:
+ Groups Name        Variance Std.Dev.
+ ID     (Intercept) 0.174985 0.4183  
+ ID.1   Valence     0.004238 0.0651  
+ Item   (Intercept) 0.214216 0.4628  
+Number of obs: 753, groups:  ID, 43; Item, 18
+
+Fixed effects:
+            Estimate Std. Error z value Pr(>|z|)  
+(Intercept) -0.55282    0.28667  -1.928   0.0538 .
+Valence      0.01245    0.04725   0.264   0.7921  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Valence -0.834
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Part 2:
+dat1$ReFixate <- as.integer(dat1$RFD > 0)
+data2 <- dat1 %>%
+  filter((!is.na(RFD) & RFD > 0))
+
+data2$log_RFD <- log(data2$RFD+1)
+
+ReFixate2aValence <- lmer(
+  log_RFD ~ Valence + (1 + Valence| ID) + (1 | Item),
+  data = data2)
+
+ReFixate2bValence <- lmer(
+  log_RFD ~ Valence + (1 + Valence|| ID) + (1 | Item),
+  data = data2)
+
+ReFixate2cValence <- lmer(
+  log_RFD ~ Valence + (1 | ID) + (1 | Item),
+  data = data2)
+
+ReFixate2dValence <- lmer(
+  log_RFD ~ Valence + (1 | ID),
+  data = data2)
+
+ReFixate2eValence <- lmer(
+  log_RFD ~ Valence + (1 | Item),
+  data = data2)
+
+anova(ReFixate2aValence, ReFixate2bValence, ReFixate2cValence, ReFixate2dValence, ReFixate2eValence)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+boundary (singular) fit: see help('isSingular')
+boundary (singular) fit: see help('isSingular')
+refitting model(s) with ML (instead of REML)
+Data: data2
+Models:
+ReFixate2dValence: log_RFD ~ Valence + (1 | ID)
+ReFixate2eValence: log_RFD ~ Valence + (1 | Item)
+ReFixate2cValence: log_RFD ~ Valence + (1 | ID) + (1 | Item)
+ReFixate2bValence: log_RFD ~ Valence + (1 + Valence || ID) + (1 | Item)
+ReFixate2aValence: log_RFD ~ Valence + (1 + Valence | ID) + (1 | Item)
+                  npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+ReFixate2dValence    4 595.15 609.91 -293.58    587.15                          
+ReFixate2eValence    4 611.80 626.56 -301.90    603.80  0.0000  0               
+ReFixate2cValence    5 591.47 609.92 -290.73    581.47 22.3338  1  2.291e-06 ***
+ReFixate2bValence    6 593.47 615.61 -290.73    581.47  0.0000  1      1.000    
+ReFixate2aValence    7 595.06 620.90 -290.53    581.06  0.4021  1      0.526    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(ReFixate2aValence)
+summary(ReFixate2cValence)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_RFD ~ Valence + (1 + Valence | ID) + (1 | Item)
+   Data: data2
+
+REML criterion at convergence: 590.4
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.3080 -0.6355 -0.1613  0.5809  2.5943 
+
+Random effects:
+ Groups   Name        Variance  Std.Dev. Corr 
+ ID       (Intercept) 0.1512834 0.3890        
+          Valence     0.0001512 0.0123   -1.00
+ Item     (Intercept) 0.0251463 0.1586        
+ Residual             0.3428401 0.5855        
+Number of obs: 296, groups:  ID, 43; Item, 18
+
+Fixed effects:
+            Estimate Std. Error       df t value Pr(>|t|)    
+(Intercept)  5.57403    0.13808 47.13511  40.367   <2e-16 ***
+Valence      0.01521    0.02090 95.62110   0.728    0.469    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Valence -0.853
+optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')
+
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_RFD ~ Valence + (1 | ID) + (1 | Item)
+   Data: data2
+
+REML criterion at convergence: 590.8
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.3268 -0.6445 -0.1709  0.5885  2.6013 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ ID       (Intercept) 0.09924  0.3150  
+ Item     (Intercept) 0.02496  0.1580  
+ Residual             0.34554  0.5878  
+Number of obs: 296, groups:  ID, 43; Item, 18
+
+Fixed effects:
+            Estimate Std. Error       df t value Pr(>|t|)    
+(Intercept)  5.58220    0.13283 70.51819  42.024   <2e-16 ***
+Valence      0.01305    0.02082 98.51671   0.627    0.532    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Valence -0.843
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
