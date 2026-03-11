@@ -1,1 +1,294 @@
+library(lme4)
+library(lmerTest)
+library(dplyr)
+library(multcomp)
+library(MuMIn)
+library(DHARMa)
+library(simr)
 
+dat1$FFD <- suppressWarnings(as.numeric(as.character(dat1$FFD)))
+
+dat1$log_FFD <- log(dat1$FFD)
+
+FFD1C <- lmer(
+  log_FFD ~ Condition + (1 + Condition| ID) + (1 | Item),
+  data = dat1)
+
+FFD2C <- lmer(
+  log_FFD ~ Condition + (1 + Condition| ID) + (1 | Item),
+  data = dat1)
+
+FFD3C <- lmer(
+  log_FFD ~ Condition + (1 | ID) + (1 | Item),
+  data = dat1)
+
+FFD4C <- lmer(
+  log_FFD ~ Condition + (1 | ID),
+  data = dat1)
+
+FFD5C <- lmer(
+  log_FFD ~ Condition + (1 | Item),
+  data = dat1)
+
+anova(FFD1C, FFD2C, FFD3C, FFD4C, FFD5C)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+boundary (singular) fit: see help('isSingular')
+boundary (singular) fit: see help('isSingular')
+refitting model(s) with ML (instead of REML)
+Data: dat1
+Models:
+FFD4C: log_FFD ~ Condition + (1 | ID)
+FFD5C: log_FFD ~ Condition + (1 | Item)
+FFD3C: log_FFD ~ Condition + (1 | ID) + (1 | Item)
+FFD1C: log_FFD ~ Condition + (1 + Condition | ID) + (1 | Item)
+FFD2C: log_FFD ~ Condition + (1 + Condition | ID) + (1 | Item)
+      npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)    
+FFD4C    5 834.11 857.75 -412.05    824.11                         
+FFD5C    5 876.64 900.29 -433.32    866.64  0.000  0               
+FFD3C    6 833.09 861.47 -410.55    821.09 45.546  1  1.491e-11 ***
+FFD1C   11 841.34 893.37 -409.67    819.34  1.751  5     0.8824    
+FFD2C   11 841.34 893.37 -409.67    819.34  0.000  0               
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(FFD3C)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_FFD ~ Condition + (1 | ID) + (1 | Item)
+   Data: dat1
+
+REML criterion at convergence: 835.6
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-2.90927 -0.70497  0.00444  0.64425  3.10720 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ ID       (Intercept) 0.019215 0.13862 
+ Item     (Intercept) 0.003083 0.05553 
+ Residual             0.144257 0.37981 
+Number of obs: 837, groups:  ID, 48; Item, 18
+
+Fixed effects:
+                   Estimate Std. Error        df t value Pr(>|t|)    
+(Intercept)        5.512197   0.037878 26.465880 145.525   <2e-16 ***
+ConditionNegative -0.071383   0.045476 15.111747  -1.570    0.137    
+ConditionPositive  0.004766   0.045428 15.048851   0.105    0.918    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+            (Intr) CndtnN
+ConditnNgtv -0.601       
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+FFD1ER <- lmer(
+  log_FFD ~ ERs + (1 + ERs| ID) + (1 | Item),
+  data = dat1)
+
+FFD2ER <- lmer(
+  log_FFD ~ ERs + (1 + ERs| ID) + (1 | Item),
+  data = dat1)
+
+FFD3ER <- lmer(
+  log_FFD ~ ERs + (1 | ID) + (1 | Item),
+  data = dat1)
+
+FFD4ER <- lmer(
+  log_FFD ~ ERs + (1 | ID),
+  data = dat1)
+
+FFD5ER <- lmer(
+  log_FFD ~ ERs + (1 | Item),
+  data = dat1)
+
+anova(FFD1ER, FFD2ER, FFD3ER, FFD4ER, FFD5ER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+boundary (singular) fit: see help('isSingular')
+boundary (singular) fit: see help('isSingular')
+refitting model(s) with ML (instead of REML)
+Data: dat1
+Models:
+FFD4ER: log_FFD ~ ERs + (1 | ID)
+FFD5ER: log_FFD ~ ERs + (1 | Item)
+FFD3ER: log_FFD ~ ERs + (1 | ID) + (1 | Item)
+FFD1ER: log_FFD ~ ERs + (1 + ERs | ID) + (1 | Item)
+FFD2ER: log_FFD ~ ERs + (1 + ERs | ID) + (1 | Item)
+       npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+FFD4ER    4 835.43 854.35 -413.71    827.43                          
+FFD5ER    4 876.25 895.16 -434.12    868.25  0.0000  0               
+FFD3ER    5 833.53 857.17 -411.76    823.53 44.7201  1  2.273e-11 ***
+FFD1ER    7 837.41 870.52 -411.71    823.41  0.1144  2     0.9444    
+FFD2ER    7 837.41 870.52 -411.71    823.41  0.0000  0               
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(FFD3ER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_FFD ~ ERs + (1 | ID) + (1 | Item)
+   Data: dat1
+
+REML criterion at convergence: 835.3
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-2.89507 -0.69780  0.00042  0.65011  3.08736 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ ID       (Intercept) 0.01905  0.13804 
+ Item     (Intercept) 0.00304  0.05513 
+ Residual             0.14456  0.38021 
+Number of obs: 837, groups:  ID, 48; Item, 18
+
+Fixed effects:
+            Estimate Std. Error       df t value Pr(>|t|)    
+(Intercept)  5.49005    0.02719 37.98896  201.91   <2e-16 ***
+ERs          0.01884    0.01682 69.34254    1.12    0.267    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+    (Intr)
+ERs 0.001 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+FFD1Valence <- lmer(
+  log_FFD ~ Valence + (1 + Valence| ID) + (1 | Item),
+  data = dat1)
+
+FFD2Valence <- lmer(
+  log_FFD ~ Valence + (1 + Valence| ID) + (1 | Item),
+  data = dat1)
+
+FFD3Valence <- lmer(
+  log_FFD ~ Valence + (1 | ID) + (1 | Item),
+  data = dat1)
+
+FFD4Valence <- lmer(
+  log_FFD ~ Valence + (1 | ID),
+  data = dat1)
+
+FFD5Valence <- lmer(
+  log_FFD ~ Valence + (1 | Item),
+  data = dat1)
+
+anova(FFD1Valence, FFD2Valence, FFD3Valence, FFD4Valence, FFD5Valence)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+boundary (singular) fit: see help('isSingular')
+boundary (singular) fit: see help('isSingular')
+refitting model(s) with ML (instead of REML)
+Data: dat1
+Models:
+FFD4Valence: log_FFD ~ Valence + (1 | ID)
+FFD5Valence: log_FFD ~ Valence + (1 | Item)
+FFD3Valence: log_FFD ~ Valence + (1 | ID) + (1 | Item)
+FFD1Valence: log_FFD ~ Valence + (1 + Valence | ID) + (1 | Item)
+FFD2Valence: log_FFD ~ Valence + (1 + Valence | ID) + (1 | Item)
+            npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+FFD4Valence    4 779.66 798.16 -385.83    771.66                          
+FFD5Valence    4 809.93 828.43 -400.96    801.93  0.0000  0               
+FFD3Valence    5 777.73 800.86 -383.87    767.73 34.1958  1  4.984e-09 ***
+FFD1Valence    7 781.71 814.09 -383.86    767.71  0.0195  2     0.9903    
+FFD2Valence    7 781.71 814.09 -383.86    767.71  0.0000  0               
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(FFD3Valence)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_FFD ~ Valence + (1 | ID) + (1 | Item)
+   Data: dat1
+
+REML criterion at convergence: 780.9
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-2.80886 -0.68821 -0.00827  0.66720  3.06500 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ ID       (Intercept) 0.018029 0.13427 
+ Item     (Intercept) 0.003496 0.05913 
+ Residual             0.149975 0.38727 
+Number of obs: 754, groups:  ID, 43; Item, 18
+
+Fixed effects:
+             Estimate Std. Error        df t value Pr(>|t|)    
+(Intercept)  5.464112   0.050857 72.816730 107.440   <2e-16 ***
+Valence      0.005365   0.007860 99.497033   0.683    0.497    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Valence -0.828
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+FFD1Arousal <- lmer(
+  log_FFD ~ Arousal + (1 + Arousal| ID) + (1 | Item),
+  data = dat1)
+
+FFD2Arousal <- lmer(
+  log_FFD ~ Arousal + (1 + Arousal| ID) + (1 | Item),
+  data = dat1)
+
+FFD3Arousal <- lmer(
+  log_FFD ~ Arousal + (1 | ID) + (1 | Item),
+  data = dat1)
+
+FFD4Arousal <- lmer(
+  log_FFD ~ Arousal + (1 | ID),
+  data = dat1)
+
+FFD5Arousal <- lmer(
+  log_FFD ~ Arousal + (1 | Item),
+  data = dat1)
+
+anova(FFD1Arousal, FFD2Arousal, FFD3Arousal, FFD4Arousal, FFD5Arousal)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+refitting model(s) with ML (instead of REML)
+Data: dat1
+Models:
+FFD4Arousal: log_FFD ~ Arousal + (1 | ID)
+FFD5Arousal: log_FFD ~ Arousal + (1 | Item)
+FFD3Arousal: log_FFD ~ Arousal + (1 | ID) + (1 | Item)
+FFD1Arousal: log_FFD ~ Arousal + (1 + Arousal | ID) + (1 | Item)
+FFD2Arousal: log_FFD ~ Arousal + (1 + Arousal | ID) + (1 | Item)
+            npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+FFD4Arousal    4 781.31 799.81 -386.66    773.31                          
+FFD5Arousal    4 812.09 830.59 -402.04    804.09  0.0000  0               
+FFD3Arousal    5 778.17 801.30 -384.09    768.17 35.9146  1  2.062e-09 ***
+FFD1Arousal    7 780.74 813.11 -383.37    766.74  1.4381  2     0.4872    
+FFD2Arousal    7 780.74 813.11 -383.37    766.74  0.0000  0               
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(FFD3Arousal)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_FFD ~ Arousal + (1 | ID) + (1 | Item)
+   Data: dat1
+
+REML criterion at convergence: 781.1
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-2.80684 -0.69509 -0.01574  0.65105  3.07222 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ ID       (Intercept) 0.018720 0.13682 
+ Item     (Intercept) 0.003769 0.06139 
+ Residual             0.149697 0.38691 
+Number of obs: 754, groups:  ID, 43; Item, 18
+
+Fixed effects:
+              Estimate Std. Error         df t value Pr(>|t|)    
+(Intercept)   5.503550   0.053086 185.320477  103.67   <2e-16 ***
+Arousal      -0.002064   0.008584 492.207398   -0.24     0.81    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Arousal -0.837
