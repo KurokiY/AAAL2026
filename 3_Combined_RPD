@@ -1,1 +1,379 @@
+library(lme4)
+library(lmerTest)
+library(dplyr)
+library(multcomp)
+library(MuMIn)
+library(simr)
+
+dat1$RPD <- suppressWarnings(as.numeric(as.character(dat1$RPD)))
+
+dat1$log_RPD <- log(dat1$RPD)
+
+RPD1C <- lmer(
+  log_RPD ~ Condition + (1 + Condition| ID) + (1 | Item),
+  data = dat1)
+
+RPD2C <- lmer(
+  log_RPD ~ Condition + (1 + Condition| ID) + (1 | Item),
+  data = dat1)
+
+RPD3C <- lmer(
+  log_RPD ~ Condition + (1 | ID) + (1 | Item),
+  data = dat1)
+
+RPD4C <- lmer(
+  log_RPD ~ Condition + (1 | ID),
+  data = dat1)
+
+RPD5C <- lmer(
+  log_RPD ~ Condition + (1 | Item),
+  data = dat1)
+
+anova(RPD1C, RPD2C, RPD3C, RPD4C, RPD5C)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+refitting model(s) with ML (instead of REML)
+Data: dat1
+Models:
+RPD4C: log_RPD ~ Condition + (1 | ID)
+RPD5C: log_RPD ~ Condition + (1 | Item)
+RPD3C: log_RPD ~ Condition + (1 | ID) + (1 | Item)
+RPD1C: log_RPD ~ Condition + (1 + Condition | ID) + (1 | Item)
+RPD2C: log_RPD ~ Condition + (1 + Condition | ID) + (1 | Item)
+      npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)    
+RPD4C    5 2236.9 2260.6 -1113.5    2226.9                         
+RPD5C    5 2297.9 2321.6 -1144.0    2287.9  0.000  0               
+RPD3C    6 2230.3 2258.8 -1109.2    2218.3 69.544  1  < 2.2e-16 ***
+RPD1C   11 2200.8 2253.0 -1089.4    2178.8 39.498  5  1.886e-07 ***
+RPD2C   11 2200.8 2253.0 -1089.4    2178.8  0.000  0               
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(RPD1C)
+summary(RPD2C)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_RPD ~ Condition + (1 + Condition | ID) + (1 | Item)
+   Data: dat1
+
+REML criterion at convergence: 2186.8
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.0310 -0.5094 -0.1330  0.3491  4.2320 
+
+Random effects:
+ Groups   Name              Variance Std.Dev. Corr       
+ ID       (Intercept)       0.14891  0.3859              
+          ConditionNegative 0.27822  0.5275   -0.30      
+          ConditionPositive 0.20190  0.4493   -0.32  0.17
+ Item     (Intercept)       0.02954  0.1719              
+ Residual                   0.62779  0.7923              
+Number of obs: 847, groups:  ID, 48; Item, 18
+
+Fixed effects:
+                   Estimate Std. Error        df t value Pr(>|t|)    
+(Intercept)        7.362056   0.101353 26.352794  72.638   <2e-16 ***
+ConditionNegative  0.133807   0.142037 25.158986   0.942    0.355    
+ConditionPositive -0.009317   0.136086 22.594863  -0.068    0.946    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+            (Intr) CndtnN
+ConditnNgtv -0.587       
+ConditnPstv -0.604  0.415
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_RPD ~ Condition + (1 + Condition | ID) + (1 | Item)
+   Data: dat1
+
+REML criterion at convergence: 2186.8
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.0310 -0.5094 -0.1330  0.3491  4.2320 
+
+Random effects:
+ Groups   Name              Variance Std.Dev. Corr       
+ ID       (Intercept)       0.14891  0.3859              
+          ConditionNegative 0.27822  0.5275   -0.30      
+          ConditionPositive 0.20190  0.4493   -0.32  0.17
+ Item     (Intercept)       0.02954  0.1719              
+ Residual                   0.62779  0.7923              
+Number of obs: 847, groups:  ID, 48; Item, 18
+
+Fixed effects:
+                   Estimate Std. Error        df t value Pr(>|t|)    
+(Intercept)        7.362056   0.101353 26.352794  72.638   <2e-16 ***
+ConditionNegative  0.133807   0.142037 25.158986   0.942    0.355    
+ConditionPositive -0.009317   0.136086 22.594863  -0.068    0.946    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+            (Intr) CndtnN
+ConditnNgtv -0.587       
+ConditnPstv -0.604  0.415
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+RPD1ER <- lmer(
+  log_RPD ~ ERs + (1 + ERs| ID) + (1 | Item),
+  data = dat1)
+
+RPD2ER <- lmer(
+  log_RPD ~ ERs + (1 + ERs| ID) + (1 | Item),
+  data = dat1)
+
+RPD3ER <- lmer(
+  log_RPD ~ ERs + (1 | ID) + (1 | Item),
+  data = dat1)
+
+RPD4ER <- lmer(
+  log_RPD ~ ERs + (1 | ID),
+  data = dat1)
+
+RPD5ER <- lmer(
+  log_RPD ~ ERs + (1 | Item),
+  data = dat1)
+
+anova(RPD1ER, RPD2ER, RPD3ER, RPD4ER, RPD5ER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+refitting model(s) with ML (instead of REML)
+Data: dat1
+Models:
+RPD4ER: log_RPD ~ ERs + (1 | ID)
+RPD5ER: log_RPD ~ ERs + (1 | Item)
+RPD3ER: log_RPD ~ ERs + (1 | ID) + (1 | Item)
+RPD1ER: log_RPD ~ ERs + (1 + ERs | ID) + (1 | Item)
+RPD2ER: log_RPD ~ ERs + (1 + ERs | ID) + (1 | Item)
+       npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)    
+RPD4ER    4 2240.5 2259.4 -1116.2    2232.5                         
+RPD5ER    4 2296.1 2315.0 -1144.0    2288.1  0.000  0               
+RPD3ER    5 2228.7 2252.4 -1109.3    2218.7 69.380  1  < 2.2e-16 ***
+RPD1ER    7 2216.2 2249.3 -1101.1    2202.2 16.527  2  0.0002577 ***
+RPD2ER    7 2216.2 2249.3 -1101.1    2202.2  0.000  0               
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(RPD1ER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_RPD ~ ERs + (1 + ERs | ID) + (1 | Item)
+   Data: dat1
+
+REML criterion at convergence: 2209.4
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.0094 -0.5629 -0.1465  0.3744  4.2279 
+
+Random effects:
+ Groups   Name        Variance Std.Dev. Corr 
+ ID       (Intercept) 0.13463  0.3669        
+          ERs         0.04717  0.2172   -0.18
+ Item     (Intercept) 0.03856  0.1964        
+ Residual             0.68126  0.8254        
+Number of obs: 847, groups:  ID, 48; Item, 18
+
+Fixed effects:
+            Estimate Std. Error       df t value Pr(>|t|)    
+(Intercept)  7.40535    0.07643 36.32300  96.896   <2e-16 ***
+ERs          0.05264    0.05614 55.53237   0.938    0.352    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+    (Intr)
+ERs -0.074
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning message:
+In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model failed to converge with max|grad| = 0.00564783 (tol = 0.002, component 1)
+Warning message:
+In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model failed to converge with max|grad| = 0.00564783 (tol = 0.002, component 1)
+refitting model(s) with ML (instead of REML)
+Data: dat1
+Models:
+RPD4Valence: log_RPD ~ Valence + (1 | ID)
+RPD5Valence: log_RPD ~ Valence + (1 | Item)
+RPD3Valence: log_RPD ~ Valence + (1 | ID) + (1 | Item)
+RPD1Valence: log_RPD ~ Valence + (1 + Valence | ID) + (1 | Item)
+RPD2Valence: log_RPD ~ Valence + (1 + Valence | ID) + (1 | Item)
+            npar    AIC    BIC   logLik -2*log(L)  Chisq Df Pr(>Chisq)    
+RPD4Valence    4 1995.7 2014.2  -993.83    1987.7                         
+RPD5Valence    4 2058.6 2077.1 -1025.28    2050.6  0.000  0               
+RPD3Valence    5 1990.2 2013.4  -990.10    1980.2 70.363  1  < 2.2e-16 ***
+RPD1Valence    7 1978.4 2010.9  -982.21    1964.4 15.786  2  0.0003734 ***
+RPD2Valence    7 1978.4 2010.9  -982.21    1964.4  0.000  0               
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(RPD1Valence)
+summary(RPD2Valence)
+summary(RPD3Valence)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_RPD ~ Valence + (1 + Valence | ID) + (1 | Item)
+   Data: dat1
+
+REML criterion at convergence: 1973.3
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.0440 -0.5565 -0.1364  0.3923  4.1675 
+
+Random effects:
+ Groups   Name        Variance Std.Dev. Corr 
+ ID       (Intercept) 0.50985  0.7140        
+          Valence     0.01088  0.1043   -0.85
+ Item     (Intercept) 0.02408  0.1552        
+ Residual             0.66225  0.8138        
+Number of obs: 763, groups:  ID, 43; Item, 18
+
+Fixed effects:
+             Estimate Std. Error        df t value Pr(>|t|)    
+(Intercept)  7.338528   0.160222 39.322248  45.802   <2e-16 ***
+Valence      0.009936   0.025394 40.743375   0.391    0.698    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Valence -0.882
+optimizer (nloptwrap) convergence code: 0 (OK)
+Model failed to converge with max|grad| = 0.00564783 (tol = 0.002, component 1)
+
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_RPD ~ Valence + (1 + Valence | ID) + (1 | Item)
+   Data: dat1
+
+REML criterion at convergence: 1973.3
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.0440 -0.5565 -0.1364  0.3923  4.1675 
+
+Random effects:
+ Groups   Name        Variance Std.Dev. Corr 
+ ID       (Intercept) 0.50985  0.7140        
+          Valence     0.01088  0.1043   -0.85
+ Item     (Intercept) 0.02408  0.1552        
+ Residual             0.66225  0.8138        
+Number of obs: 763, groups:  ID, 43; Item, 18
+
+Fixed effects:
+             Estimate Std. Error        df t value Pr(>|t|)    
+(Intercept)  7.338528   0.160222 39.322248  45.802   <2e-16 ***
+Valence      0.009936   0.025394 40.743375   0.391    0.698    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Valence -0.882
+optimizer (nloptwrap) convergence code: 0 (OK)
+Model failed to converge with max|grad| = 0.00564783 (tol = 0.002, component 1)
+
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_RPD ~ Valence + (1 | ID) + (1 | Item)
+   Data: dat1
+
+REML criterion at convergence: 1989.8
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.7433 -0.5699 -0.1643  0.3842  4.0875 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ ID       (Intercept) 0.13971  0.3738  
+ Item     (Intercept) 0.02465  0.1570  
+ Residual             0.70807  0.8415  
+Number of obs: 763, groups:  ID, 43; Item, 18
+
+Fixed effects:
+             Estimate Std. Error        df t value Pr(>|t|)    
+(Intercept)   7.29760    0.12188  83.52954  59.877   <2e-16 ***
+Valence       0.01836    0.01801 116.25231   1.019     0.31    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Valence -0.791
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+RPD1Arousal <- lmer(
+  log_RPD ~ Arousal + (1 + Arousal| ID) + (1 | Item),
+  data = dat1)
+
+RPD2Arousal <- lmer(
+  log_RPD ~ Arousal + (1 + Arousal| ID) + (1 | Item),
+  data = dat1)
+
+RPD3Arousal <- lmer(
+  log_RPD ~ Arousal + (1 | ID) + (1 | Item),
+  data = dat1)
+
+RPD4Arousal <- lmer(
+  log_RPD ~ Arousal + (1 | ID),
+  data = dat1)
+
+RPD5Arousal <- lmer(
+  log_RPD ~ Arousal + (1 | Item),
+  data = dat1)
+
+anova(RPD1Arousal, RPD2Arousal, RPD3Arousal, RPD4Arousal, RPD5Arousal)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning message:
+In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model failed to converge with max|grad| = 0.00912034 (tol = 0.002, component 1)
+Warning message:
+In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model failed to converge with max|grad| = 0.00912034 (tol = 0.002, component 1)
+refitting model(s) with ML (instead of REML)
+Data: dat1
+Models:
+RPD4Arousal: log_RPD ~ Arousal + (1 | ID)
+RPD5Arousal: log_RPD ~ Arousal + (1 | Item)
+RPD3Arousal: log_RPD ~ Arousal + (1 | ID) + (1 | Item)
+RPD1Arousal: log_RPD ~ Arousal + (1 + Arousal | ID) + (1 | Item)
+RPD2Arousal: log_RPD ~ Arousal + (1 + Arousal | ID) + (1 | Item)
+            npar    AIC    BIC   logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+RPD4Arousal    4 1994.8 2013.4  -993.43    1986.8                          
+RPD5Arousal    4 2057.5 2076.1 -1024.77    2049.5  0.0000  0               
+RPD3Arousal    5 1990.6 2013.8  -990.31    1980.6 68.9217  1     <2e-16 ***
+RPD1Arousal    7 1992.9 2025.3  -989.44    1978.9  1.7298  2     0.4211    
+RPD2Arousal    7 1992.9 2025.3  -989.44    1978.9  0.0000  0               
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(RPD3Arousal)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: log_RPD ~ Arousal + (1 | ID) + (1 | Item)
+   Data: dat1
+
+REML criterion at convergence: 1990.1
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.7376 -0.5634 -0.1553  0.3823  4.0748 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ ID       (Intercept) 0.13888  0.3727  
+ Item     (Intercept) 0.01963  0.1401  
+ Residual             0.71088  0.8431  
+Number of obs: 763, groups:  ID, 43; Item, 18
+
+Fixed effects:
+             Estimate Std. Error        df t value Pr(>|t|)    
+(Intercept)   7.32827    0.12241 189.59648  59.868   <2e-16 ***
+Arousal       0.01310    0.01909 615.47887   0.686    0.493    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Arousal -0.806
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
