@@ -264,6 +264,44 @@ Correlation of Fixed Effects:
         (Intr)
 Valence -0.900
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Skip1Arousal <- glmer(
+  Skip ~ Arousal + (1 + Arousal| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+Skip2Arousal <- glmer(
+  Skip ~ Arousal + (1 + Arousal|| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+Skip3Arousal <- glmer(
+  Skip ~ Arousal + (1 | ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+Skip4Arousal <- glmer(
+  Skip ~ Arousal + (1 | ID),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+Skip5Arousal <- glmer(
+  Skip ~ Arousal + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+anova(Skip1Arousal, Skip2Arousal, Skip3Arousal, Skip4Arousal, Skip5Arousal)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 boundary (singular) fit: see help('isSingular')
 Warning messages:
 1: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
