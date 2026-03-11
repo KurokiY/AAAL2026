@@ -1,1 +1,436 @@
+Skip1C <- glmer(
+   Skip ~ Condition + (1 + Condition| ID) + (1 | Item),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+ 
+ Skip2C <- glmer(
+   Skip ~ Condition + (1 + Condition|| ID) + (1 | Item),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+ 
+ 
+ Skip3C <- glmer(
+   Skip ~ Condition + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+ 
+ Skip4C <- glmer(
+   Skip ~ Condition + (1 | ID),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+ 
+Skip5C <- glmer(
+   Skip ~ Condition + (1 | Item),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+ 
+ anova(Skip1C, Skip2C, Skip3C, Skip4C, Skip5C)
 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+boundary (singular) fit: see help('isSingular')
+boundary (singular) fit: see help('isSingular')
+Data: dat1
+Models:
+Skip4C: Skip ~ Condition + (1 | ID)
+Skip5C: Skip ~ Condition + (1 | Item)
+Skip3C: Skip ~ Condition + (1 | ID) + (1 | Item)
+Skip1C: Skip ~ Condition + (1 + Condition | ID) + (1 | Item)
+Skip2C: Skip ~ Condition + (1 + Condition || ID) + (1 | Item)
+       npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+Skip4C    4 610.86 629.83 -301.43    602.86                          
+Skip5C    4 589.40 608.38 -290.70    581.40 21.4534  0               
+Skip3C    5 575.71 599.42 -282.86    565.71 15.6946  1  7.444e-05 ***
+Skip1C   10 580.01 627.44 -280.00    560.01  5.6992  5     0.3366    
+Skip2C   11 581.93 634.10 -279.96    559.93  0.0826  1     0.7739    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(Skip3C)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) [glmerMod]
+ Family: binomial  ( logit )
+Formula: Skip ~ Condition + (1 | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    575.7     599.4    -282.9     565.7       843 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.1153 -0.3528 -0.2607 -0.1836  4.7546 
+
+Random effects:
+ Groups Name        Variance Std.Dev.
+ ID     (Intercept) 0.6618   0.8135  
+ Item   (Intercept) 0.8209   0.9060  
+Number of obs: 848, groups:  ID, 48; Item, 18
+
+Fixed effects:
+                  Estimate Std. Error z value Pr(>|z|)    
+(Intercept)       -2.46924    0.45138  -5.470 4.49e-08 ***
+ConditionNegative -0.22500    0.60792  -0.370    0.711    
+ConditionPositive  0.08895    0.59755   0.149    0.882    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+            (Intr) CndtnN
+ConditnNgtv -0.654       
+ConditnPstv -0.677  0.497
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Skip1ER <- glmer(
+   Skip ~ ERs + (1 + ERs| ID) + (1 | Item),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+ 
+Skip2ER <- glmer(
+   Skip ~ ERs + (1 + ERs|| ID) + (1 | Item),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+ 
+ Skip3ER <- glmer(
+   Skip ~ ERs + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+ 
+ Skip4ER <- glmer(
+   Skip ~ ERs + (1 | ID),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+ 
+ Skip5ER <- glmer(
+   Skip ~ ERs + (1 | Item),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+ 
+anova(Skip1ER, Skip2ER, Skip3ER, Skip4ER, Skip5ER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning message:
+In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model failed to converge with max|grad| = 0.0416647 (tol = 0.002, component 1)
+Data: dat1
+Models:
+Skip4ER: Skip ~ ERs + (1 | ID)
+Skip5ER: Skip ~ ERs + (1 | Item)
+Skip3ER: Skip ~ ERs + (1 | ID) + (1 | Item)
+Skip2ER: Skip ~ ERs + (1 + ERs || ID) + (1 | Item)
+Skip1ER: Skip ~ ERs + (1 + ERs | ID) + (1 | Item)
+        npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)   
+Skip4ER    3 604.05 618.27 -299.02    598.05                         
+Skip5ER    3 572.46 586.69 -283.23    566.46 31.5875  0              
+Skip3ER    4 565.29 584.26 -278.64    557.29  9.1708  1   0.002459 **
+Skip2ER    5 565.59 589.30 -277.79    555.59  1.7008  1   0.192185   
+Skip1ER    6 567.13 595.59 -277.57    555.13  0.4533  1   0.500760   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(Skip3ER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) [glmerMod]
+ Family: binomial  ( logit )
+Formula: Skip ~ ERs + (1 | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    565.3     584.3    -278.6     557.3       844 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.1332 -0.3523 -0.2554 -0.1719  5.3236 
+
+Random effects:
+ Groups Name        Variance Std.Dev.
+ ID     (Intercept) 0.4880   0.6986  
+ Item   (Intercept) 0.9364   0.9677  
+Number of obs: 848, groups:  ID, 48; Item, 18
+
+Fixed effects:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -2.5393     0.2951  -8.606  < 2e-16 ***
+ERs           0.5251     0.1771   2.965  0.00303 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+    (Intr)
+ERs -0.113
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Skip1Valence <- glmer(
+   Skip ~ Valence + (1 + Valence| ID) + (1 | Item),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+ 
+ Skip2Valence <- glmer(
+   Skip ~ Valence + (1 + Valence|| ID) + (1 | Item),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+ 
+ Skip3Valence <- glmer(
+   Skip ~ Valence + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+ 
+ Skip4Valence <- glmer(
+   Skip ~ Valence + (1 | ID),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+ 
+ Skip5Valence <- glmer(
+   Skip ~ Valence + (1 | Item),
+   data = dat1,
+   family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+
+anova(Skip1Valence, Skip2Valence, Skip3Valence, Skip4Valence, Skip5Valence)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning messages:
+1: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model failed to converge with max|grad| = 0.062048 (tol = 0.002, component 1)
+2: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model is nearly unidentifiable: very large eigenvalue
+ - Rescale variables?
+Warning messages:
+1: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model failed to converge with max|grad| = 0.0638963 (tol = 0.002, component 1)
+2: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model is nearly unidentifiable: very large eigenvalue
+ - Rescale variables?
+Data: dat1
+Models:
+Skip4Valence: Skip ~ Valence + (1 | ID)
+Skip5Valence: Skip ~ Valence + (1 | Item)
+Skip3Valence: Skip ~ Valence + (1 | ID) + (1 | Item)
+Skip2Valence: Skip ~ Valence + (1 + Valence || ID) + (1 | Item)
+Skip1Valence: Skip ~ Valence + (1 + Valence | ID) + (1 | Item)
+             npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+Skip4Valence    3 548.81 562.72 -271.41    542.81                          
+Skip5Valence    3 520.80 534.71 -257.40    514.80 28.0141  0               
+Skip3Valence    4 510.29 528.84 -251.14    502.29 12.5108  1  0.0004046 ***
+Skip2Valence    5 512.03 535.22 -251.01    502.03  0.2573  1  0.6119852    
+Skip1Valence    6 513.95 541.77 -250.97    501.95  0.0817  1  0.7750196    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(Skip3Valence)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) [glmerMod]
+ Family: binomial  ( logit )
+Formula: Skip ~ Valence + (1 | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    510.3     528.8    -251.1     502.3       759 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.2100 -0.3577 -0.2426 -0.1558  5.1508 
+
+Random effects:
+ Groups Name        Variance Std.Dev.
+ ID     (Intercept) 0.648    0.805   
+ Item   (Intercept) 1.015    1.007   
+Number of obs: 763, groups:  ID, 43; Item, 18
+
+Fixed effects:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -3.72016    0.55367  -6.719 1.83e-11 ***
+Valence      0.21076    0.07852   2.684  0.00727 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Valence -0.821
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Skip1Arousal <- glmer(
+  Skip ~ Arousal + (1 + Arousal| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+Skip2Arousal <- glmer(
+  Skip ~ Arousal + (1 + Arousal|| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+Skip3Arousal <- glmer(
+  Skip ~ Arousal + (1 | ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+Skip4Arousal <- glmer(
+  Skip ~ Arousal + (1 | ID),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+Skip5Arousal <- glmer(
+  Skip ~ Arousal + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+
+anova(Skip1Arousal, Skip2Arousal, Skip3Arousal, Skip4Arousal, Skip5Arousal)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning messages:
+1: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model failed to converge with max|grad| = 0.0694099 (tol = 0.002, component 1)
+2: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model is nearly unidentifiable: very large eigenvalue
+ - Rescale variables?
+Data: dat1
+Models:
+Skip4Arousal: Skip ~ Arousal + (1 | ID)
+Skip5Arousal: Skip ~ Arousal + (1 | Item)
+Skip3Arousal: Skip ~ Arousal + (1 | ID) + (1 | Item)
+Skip2Arousal: Skip ~ Arousal + (1 + Arousal || ID) + (1 | Item)
+Skip1Arousal: Skip ~ Arousal + (1 + Arousal | ID) + (1 | Item)
+             npar    AIC    BIC  logLik -2*log(L)   Chisq Df Pr(>Chisq)    
+Skip4Arousal    3 554.40 568.31 -274.20    548.40                          
+Skip5Arousal    3 533.20 547.12 -263.60    527.20 21.1956  0               
+Skip3Arousal    4 517.36 535.91 -254.68    509.36 17.8397  1  2.403e-05 ***
+Skip2Arousal    5 517.44 540.62 -253.72    507.44  1.9260  1     0.1652    
+Skip1Arousal    6 519.18 547.01 -253.59    507.18  0.2556  1     0.6131    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(Skip1Arousal)
+summary(Skip2Arousal)
+summary(Skip3Arousal)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) [glmerMod]
+ Family: binomial  ( logit )
+Formula: Skip ~ Arousal + (1 + Arousal | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    519.2     547.0    -253.6     507.2       757 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.3372 -0.3494 -0.2448 -0.1735  5.9225 
+
+Random effects:
+ Groups Name        Variance Std.Dev. Corr
+ ID     (Intercept) 0.05827  0.2414       
+        Arousal     0.01456  0.1207   1.00
+ Item   (Intercept) 0.97658  0.9882       
+Number of obs: 763, groups:  ID, 43; Item, 18
+
+Fixed effects:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -2.36862    0.46953  -5.045 4.54e-07 ***
+Arousal     -0.04149    0.07868  -0.527    0.598    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Arousal -0.729
+optimizer (bobyqa) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')
+
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) [glmerMod]
+ Family: binomial  ( logit )
+Formula: Skip ~ Arousal + (1 + Arousal || ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    517.4     540.6    -253.7     507.4       758 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.3602 -0.3488 -0.2464 -0.1756  5.9335 
+
+Random effects:
+ Groups Name        Variance Std.Dev.
+ ID     (Intercept) 0.06039  0.2457  
+ ID.1   Arousal     0.02353  0.1534  
+ Item   (Intercept) 0.97084  0.9853  
+Number of obs: 763, groups:  ID, 43; Item, 18
+
+Fixed effects:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -2.33834    0.48646  -4.807 1.53e-06 ***
+Arousal     -0.04627    0.08343  -0.555    0.579    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Arousal -0.755
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) [glmerMod]
+ Family: binomial  ( logit )
+Formula: Skip ~ Arousal + (1 | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    517.4     535.9    -254.7     509.4       759 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.2176 -0.3604 -0.2437 -0.1701  5.7088 
+
+Random effects:
+ Groups Name        Variance Std.Dev.
+ ID     (Intercept) 0.8345   0.9135  
+ Item   (Intercept) 1.0110   1.0055  
+Number of obs: 763, groups:  ID, 43; Item, 18
+
+Fixed effects:
+             Estimate Std. Error  z value Pr(>|z|)    
+(Intercept) -2.426762   0.001109 -2189.09   <2e-16 ***
+Arousal     -0.017639   0.001074   -16.42   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Arousal 0.000 
+optimizer (bobyqa) convergence code: 0 (OK)
+Model failed to converge with max|grad| = 0.0694099 (tol = 0.002, component 1)
+Model is nearly unidentifiable: very large eigenvalue
+ - Rescale variables?
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
