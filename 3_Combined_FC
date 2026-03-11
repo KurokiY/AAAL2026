@@ -1,1 +1,333 @@
+library(glmmTMB)
+library(DHARMa)
+library(MuMIn)
+library(tidyverse)
+setwd("/Users/yusukekuroki/Desktop/Eye_Tracking")
+dat1_bpp <- read.csv("RQ2_combined.csv")
+dat1_bpp
+
+colnames(dat1_bpp)[colnames(dat1_bpp) == "AOI.selection"] <- "Condition" 
+colnames(dat1_bpp)[colnames(dat1_bpp) == "RECORDING_SESSION_LABEL"] <- "ID" 
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_LABEL"] <- "Item" 
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_SKIP"] <- "Skip"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_FIXATION_COUNT"] <- "FC"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_FIRST_FIXATION_DURATION"] <- "FFD"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_REGRESSION_PATH_DURATION"] <- "RPD"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_REREADING_TIME"] <- "RRT"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_REFIXATION_DURATION"] <- "RFD"
+
+dat1 <- dat1_bpp %>% 
+  mutate( 
+    Condition = relevel(as.factor(Condition), ref = "Neutral"),
+    ID = as.factor(ID), 
+    Item = as.factor(Item) 
+  )
+
+dat1$ERs<-scale(dat1$ER)
+
+FC1C <- glmmTMB(
+   FC ~ Condition + (1 + Condition| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+ FC2C <- glmmTMB(
+   FC ~ Condition + (1 + Condition|| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC3C<- glmmTMB(
+   FC ~ Condition + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC4C <- glmmTMB(
+   FC~ Condition + (1 | ID),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC5C <- glmmTMB(
+   FC ~ Condition + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+anova(FC1C,FC2C,FC3C,FC4C,FC5C)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Data: dat1
+Models:
+FC4C: FC ~ Condition + (1 | ID), zi=~0, disp=~1
+FC5C: FC ~ Condition + (1 | Item), zi=~0, disp=~1
+FC3C: FC ~ Condition + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC2C: FC ~ Condition + (1 + Condition || ID) + (1 | Item), zi=~0, disp=~1
+FC1C: FC ~ Condition + (1 + Condition | ID) + (1 | Item), zi=~0, disp=~1
+     Df    AIC    BIC  logLik deviance   Chisq Chi Df Pr(>Chisq)    
+FC4C  5 4475.0 4498.7 -2232.5   4465.0                              
+FC5C  5 4654.2 4678.0 -2322.1   4644.2   0.000      0  1.0000000    
+FC3C  6 4436.1 4464.6 -2212.1   4424.1 220.154      1  < 2.2e-16 ***
+FC2C  8 4343.9 4381.9 -2164.0   4327.9  96.181      2  < 2.2e-16 ***
+FC1C 11 4333.4 4385.5 -2155.7   4311.4  16.549      3  0.0008747 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(FC1C)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ Family: nbinom2  ( log )
+Formula:          FC ~ Condition + (1 + Condition | ID) + (1 | Item)
+Data: dat1
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   4333.4    4385.5   -2155.7    4311.4       837 
+
+Random effects:
+
+Conditional model:
+ Groups Name              Variance Std.Dev. Corr        
+ ID     (Intercept)       0.13461  0.3669               
+        ConditionNegative 0.17331  0.4163   -0.47       
+        ConditionPositive 0.17685  0.4205   -0.47  0.55 
+ Item   (Intercept)       0.02193  0.1481               
+Number of obs: 848, groups:  ID, 48; Item, 18
+
+Dispersion parameter for nbinom2 family (): 42.5 
+
+Conditional model:
+                  Estimate Std. Error z value Pr(>|z|)    
+(Intercept)        1.90686    0.08441  22.592   <2e-16 ***
+ConditionNegative  0.03941    0.11067   0.356    0.722    
+ConditionPositive -0.07211    0.11116  -0.649    0.517    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+FC1ER <- glmmTMB(
+   FC ~ ERs + (1 + ERs| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+ FC2ER <- glmmTMB(
+   FC ~ ERs + (1 + ERs|| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC3ER<- glmmTMB(
+   FC ~ ERs + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC4ER <- glmmTMB(
+   FC~ ERs + (1 | ID),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC5ER <- glmmTMB(
+   FC ~ ERs + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+
+anova(FC1ER,FC2ER,FC3ER,FC4ER,FC5ER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Data: dat1
+Models:
+FC4ER: FC ~ ERs + (1 | ID), zi=~0, disp=~1
+FC5ER: FC ~ ERs + (1 | Item), zi=~0, disp=~1
+FC3ER: FC ~ ERs + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC2ER: FC ~ ERs + (1 + ERs || ID) + (1 | Item), zi=~0, disp=~1
+FC1ER: FC ~ ERs + (1 + ERs | ID) + (1 | Item), zi=~0, disp=~1
+      Df    AIC    BIC  logLik deviance   Chisq Chi Df Pr(>Chisq)    
+FC4ER  4 4482.3 4501.3 -2237.2   4474.3                              
+FC5ER  4 4647.4 4666.3 -2319.7   4639.4   0.000      0     1.0000    
+FC3ER  5 4427.8 4451.5 -2208.9   4417.8 221.623      1  < 2.2e-16 ***
+FC2ER  6 4383.6 4412.0 -2185.8   4371.6  46.195      1   1.07e-11 ***
+FC1ER  7 4383.4 4416.6 -2184.7   4369.4   2.144      1     0.1431    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(FC1ER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ Family: nbinom2  ( log )
+Formula:          FC ~ ERs + (1 + ERs | ID) + (1 | Item)
+Data: dat1
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   4383.4    4416.6   -2184.7    4369.4       841 
+
+Random effects:
+
+Conditional model:
+ Groups Name        Variance Std.Dev. Corr  
+ ID     (Intercept) 0.10223  0.3197         
+        ERs         0.02591  0.1610   -0.30 
+ Item   (Intercept) 0.03162  0.1778         
+Number of obs: 848, groups:  ID, 48; Item, 18
+
+Dispersion parameter for nbinom2 family (): 19.9 
+
+Conditional model:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  1.90809    0.06467  29.507   <2e-16 ***
+ERs          0.07884    0.04016   1.963   0.0496 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+FC1Valence <- glmmTMB(
+   FC ~ Valence + (1 + Valence| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+ FC2Valence <- glmmTMB(
+   FC ~ Valence + (1 + Valence|| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC3Valence<- glmmTMB(
+   FC ~ Valence + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC4Valence <- glmmTMB(
+   FC~ Valence + (1 | ID),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC5Valence <- glmmTMB(
+   FC ~ Valence + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+
+anova(FC1Valence,FC2Valence,FC3Valence,FC4Valence,FC5Valence)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Data: dat1
+Models:
+FC4Valence: FC ~ Valence + (1 | ID), zi=~0, disp=~1
+FC5Valence: FC ~ Valence + (1 | Item), zi=~0, disp=~1
+FC3Valence: FC ~ Valence + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC2Valence: FC ~ Valence + (1 + Valence || ID) + (1 | Item), zi=~0, disp=~1
+FC1Valence: FC ~ Valence + (1 + Valence | ID) + (1 | Item), zi=~0, disp=~1
+           Df    AIC    BIC  logLik deviance    Chisq Chi Df Pr(>Chisq)    
+FC4Valence  4 4015.4 4034.0 -2003.7   4007.4                               
+FC5Valence  4 4158.4 4176.9 -2075.2   4150.4   0.0000      0    1.00000    
+FC3Valence  5 3982.6 4005.8 -1986.3   3972.6 177.8055      1  < 2.2e-16 ***
+FC2Valence  6 3979.6 4007.4 -1983.8   3967.6   4.9613      1    0.02592 *  
+FC1Valence  7 3952.8 3985.2 -1969.4   3938.8  28.8274      1  7.912e-08 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(FC1Valence)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ Family: nbinom2  ( log )
+Formula:          FC ~ Valence + (1 + Valence | ID) + (1 | Item)
+Data: dat1
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   3952.8    3985.2   -1969.4    3938.8       756 
+
+Random effects:
+
+Conditional model:
+ Groups Name        Variance Std.Dev. Corr  
+ ID     (Intercept) 0.392954 0.62686        
+        Valence     0.006342 0.07964  -0.90 
+ Item   (Intercept) 0.021655 0.14716        
+Number of obs: 763, groups:  ID, 43; Item, 18
+
+Dispersion parameter for nbinom2 family (): 16.8 
+
+Conditional model:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) 1.840895   0.127519  14.436   <2e-16 ***
+Valence     0.008581   0.018172   0.472    0.637    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+FC1Arousal <- glmmTMB(
+   FC ~ Arousal + (1 + Arousal| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+ FC2Arousal <- glmmTMB(
+   FC ~ Arousal + (1 + Arousal|| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC3Arousal<- glmmTMB(
+   FC ~ Arousal + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC4Arousal <- glmmTMB(
+   FC~ Arousal + (1 | ID),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC5Arousal <- glmmTMB(
+   FC ~ Arousal + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+
+anova(FC1Arousal,FC2Arousal,FC3Arousal,FC4Arousal,FC5Arousal)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Data: dat1
+Models:
+FC4Arousal: FC ~ Arousal + (1 | ID), zi=~0, disp=~1
+FC5Arousal: FC ~ Arousal + (1 | Item), zi=~0, disp=~1
+FC3Arousal: FC ~ Arousal + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC2Arousal: FC ~ Arousal + (1 + Arousal || ID) + (1 | Item), zi=~0, disp=~1
+FC1Arousal: FC ~ Arousal + (1 + Arousal | ID) + (1 | Item), zi=~0, disp=~1
+           Df    AIC    BIC  logLik deviance   Chisq Chi Df Pr(>Chisq)    
+FC4Arousal  4 4016.7 4035.2 -2004.3   4008.7                              
+FC5Arousal  4 4159.0 4177.6 -2075.5   4151.0   0.000      0  1.0000000    
+FC3Arousal  5 3982.8 4006.0 -1986.4   3972.8 178.232      1  < 2.2e-16 ***
+FC2Arousal  6 3969.1 3996.9 -1978.5   3957.1  15.675      1  7.523e-05 ***
+FC1Arousal  7 3960.2 3992.7 -1973.1   3946.2  10.899      1  0.0009622 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(FC1Arousal)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ Family: nbinom2  ( log )
+Formula:          FC ~ Arousal + (1 + Arousal | ID) + (1 | Item)
+Data: dat1
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   3960.2    3992.7   -1973.1    3946.2       756 
+
+Random effects:
+
+Conditional model:
+ Groups Name        Variance Std.Dev. Corr  
+ ID     (Intercept) 0.163518 0.40437        
+        Arousal     0.008287 0.09103  -0.77 
+ Item   (Intercept) 0.021098 0.14525        
+Number of obs: 763, groups:  ID, 43; Item, 18
+
+Dispersion parameter for nbinom2 family (): 15.9 
+
+Conditional model:
+             Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  1.924253   0.100807  19.089   <2e-16 ***
+Arousal     -0.009357   0.019278  -0.485    0.627    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
