@@ -145,6 +145,39 @@ Skip1ER    6 671.60 700.06 -329.80    659.60 0.2984  1   0.584906
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(Skip1ER)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+ Family: binomial  ( logit )
+Formula: Skip ~ ERs + (1 + ERs | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    671.6     700.1    -329.8     659.6       842 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.3093 -0.3928 -0.3141 -0.2471  3.6842 
+
+Random effects:
+ Groups Name        Variance Std.Dev. Corr
+ ID     (Intercept) 0.3045   0.5519       
+        ERs         0.2359   0.4857   0.27
+ Item   (Intercept) 0.3672   0.6060       
+Number of obs: 848, groups:  ID, 48; Item, 18
+
+Fixed effects:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -2.1123     0.2139  -9.875   <2e-16 ***
+ERs           0.3356     0.1870   1.795   0.0726 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+    (Intr)
+ERs -0.045
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Skip1Valence <- glmer(
    Skip ~ Valence + (1 + Valence| ID) + (1 | Item),
    data = dat1,
@@ -198,3 +231,90 @@ Skip1Valence    6 616.15 643.97 -302.08    604.15  2.6575  1  0.1030610
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(Skip1Valence)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+ Family: binomial  ( logit )
+Formula: Skip ~ Valence + (1 + Valence | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    616.2     644.0    -302.1     604.2       757 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.1800 -0.4046 -0.3182 -0.2364  3.5917 
+
+Random effects:
+ Groups Name        Variance Std.Dev. Corr 
+ ID     (Intercept) 1.98349  1.4084        
+        Valence     0.05986  0.2447   -0.90
+ Item   (Intercept) 0.35340  0.5945        
+Number of obs: 763, groups:  ID, 43; Item, 18
+
+Fixed effects:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -2.8249     0.5147  -5.489 4.04e-08 ***
+Valence       0.1347     0.0828   1.626    0.104    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Valence -0.900
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+boundary (singular) fit: see help('isSingular')
+Warning messages:
+1: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model failed to converge with max|grad| = 0.0607298 (tol = 0.002, component 1)
+2: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+  Model is nearly unidentifiable: very large eigenvalue
+ - Rescale variables?
+Data: dat1
+Models:
+Skip4Arousal: Skip ~ Arousal + (1 | ID)
+Skip5Arousal: Skip ~ Arousal + (1 | Item)
+Skip3Arousal: Skip ~ Arousal + (1 | ID) + (1 | Item)
+Skip2Arousal: Skip ~ Arousal + (1 + Arousal || ID) + (1 | Item)
+Skip1Arousal: Skip ~ Arousal + (1 + Arousal | ID) + (1 | Item)
+             npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)    
+Skip4Arousal    3 632.21 646.12 -313.10    626.21                         
+Skip5Arousal    3 635.22 649.14 -314.61    629.22  0.000  0               
+Skip3Arousal    4 621.25 639.80 -306.63    613.25 15.972  1  6.429e-05 ***
+Skip2Arousal    5 622.67 645.86 -306.33    612.67  0.583  1     0.4451    
+Skip1Arousal    6 624.47 652.29 -306.23    612.47  0.200  1     0.6547    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(Skip3Arousal)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+ Family: binomial  ( logit )
+Formula: Skip ~ Arousal + (1 | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    621.3     639.8    -306.6     613.3       759 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.0578 -0.4205 -0.3272 -0.2462  3.6234 
+
+Random effects:
+ Groups Name        Variance Std.Dev.
+ ID     (Intercept) 0.5863   0.7657  
+ Item   (Intercept) 0.3272   0.5720  
+Number of obs: 763, groups:  ID, 43; Item, 18
+
+Fixed effects:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -1.90545    0.38681  -4.926 8.39e-07 ***
+Arousal     -0.02549    0.06268  -0.407    0.684    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+        (Intr)
+Arousal -0.822
