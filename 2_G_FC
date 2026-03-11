@@ -1,1 +1,73 @@
+library(glmmTMB)
+library(DHARMa)
+library(MuMIn)
+library(tidyverse)
+setwd("/Users/yusukekuroki/Desktop/Eye_Tracking")
+dat1_bpp <- read.csv("RQ_glosses.csv")
+dat1_bpp
+
+dat1 <- dat1_bpp %>% 
+  mutate( 
+    Condition = relevel(as.factor(Condition), ref = "Neutral"),
+    ID = as.factor(ID), 
+    Item = as.factor(Item) 
+  )
+
+dat1$ERs<-scale(dat1$ER)
+
+FC1C <- glmmTMB(
+   FC ~ Condition + (1 + Condition| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+ FC2C <- glmmTMB(
+   FC ~ Condition + (1 + Condition|| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC3C<- glmmTMB(
+   FC ~ Condition + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC4C <- glmmTMB(
+   FC~ Condition + (1 | ID),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC5C <- glmmTMB(
+   FC ~ Condition + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+anova(FC1C,FC2C,FC3C,FC4C,FC5C)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning message:
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; false convergence (8). See vignette('troubleshooting'), help('diagnose')
+Data: dat1
+Models:
+FC4C: FC ~ Condition + (1 | ID), zi=~0, disp=~1
+FC5C: FC ~ Condition + (1 | Item), zi=~0, disp=~1
+FC3C: FC ~ Condition + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC2C: FC ~ Condition + (1 + Condition || ID) + (1 | Item), zi=~0, disp=~1
+FC1C: FC ~ Condition + (1 + Condition | ID) + (1 | Item), zi=~0, disp=~1
+     Df    AIC    BIC  logLik deviance Chisq Chi Df Pr(>Chisq)    
+FC4C  5 3198.9 3222.7 -1594.5   3188.9                            
+FC5C  5 3311.4 3335.2 -1650.7   3301.4   0.0      0          1    
+FC3C  6 3168.0 3196.5 -1578.0   3156.0 145.4      1     <2e-16 ***
+FC2C  8                                           2               
+FC1C 11 3159.9 3212.1 -1569.0   3137.9            3               
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
