@@ -70,4 +70,88 @@ FC1C 11 3159.9 3212.1 -1569.0   3137.9            3
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(FC1C)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ Family: nbinom2  ( log )
+Formula:          FC ~ Condition + (1 + Condition | ID) + (1 | Item)
+Data: dat1
 
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   3159.9    3212.1   -1569.0    3137.9       837 
+
+Random effects:
+
+Conditional model:
+ Groups Name              Variance Std.Dev. Corr        
+ ID     (Intercept)       0.10621  0.3259               
+        ConditionNegative 0.08813  0.2969   -0.29       
+        ConditionPositive 0.08872  0.2979   -0.39  0.52 
+ Item   (Intercept)       0.02559  0.1600               
+Number of obs: 848, groups:  ID, 48; Item, 18
+
+Dispersion parameter for nbinom2 family (): 5.95e+08 
+
+Conditional model:
+                  Estimate Std. Error z value Pr(>|z|)    
+(Intercept)        1.06555    0.08835  12.061   <2e-16 ***
+ConditionNegative -0.04432    0.11452  -0.387   0.6988    
+ConditionPositive -0.19827    0.11525  -1.720   0.0854 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+FC1ER <- glmmTMB(
+   FC ~ ERs + (1 + ERs| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+ FC2ER <- glmmTMB(
+   FC ~ ERs + (1 + ERs|| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC3ER<- glmmTMB(
+   FC ~ ERs + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC4ER <- glmmTMB(
+   FC~ ERs + (1 | ID),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC5ER <- glmmTMB(
+   FC ~ ERs + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+
+anova(FC1ER,FC2ER,FC3ER,FC4ER,FC5ER)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; false convergence (8). See vignette('troubleshooting'), help('diagnose')
+Warning messages:
+1: In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+2: In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; false convergence (8). See vignette('troubleshooting'), help('diagnose')
+Data: dat1
+Models:
+FC4ER: FC ~ ERs + (1 | ID), zi=~0, disp=~1
+FC5ER: FC ~ ERs + (1 | Item), zi=~0, disp=~1
+FC3ER: FC ~ ERs + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC2ER: FC ~ ERs + (1 + ERs || ID) + (1 | Item), zi=~0, disp=~1
+FC1ER: FC ~ ERs + (1 + ERs | ID) + (1 | Item), zi=~0, disp=~1
+      Df    AIC    BIC  logLik deviance  Chisq Chi Df Pr(>Chisq)    
+FC4ER  4 3213.5 3232.4 -1602.7   3205.5                             
+FC5ER  4 3308.5 3327.5 -1650.2   3300.5   0.00      0          1    
+FC3ER  5 3165.6 3189.3 -1577.8   3155.6 144.86      1     <2e-16 ***
+FC2ER  6                                            1               
+FC1ER  7 3159.8 3193.0 -1572.9   3145.8             1               
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
