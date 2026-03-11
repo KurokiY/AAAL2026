@@ -1,1 +1,40 @@
+library(lme4)
+library(lmerTest)
+library(dplyr)
+library(multcomp)
+library(MuMIn)
+library(simr)
 
+dat1$RPD <- suppressWarnings(as.numeric(as.character(dat1$RPD)))
+
+dat1$log_RPD <- log(dat1$RPD)
+
+RPD1C <- lmer(
+  log_RPD ~ Condition + (1 + Condition| ID) + (1 | Item),
+  data = dat1)
+
+RPD2C <- lmer(
+  log_RPD ~ Condition + (1 + Condition| ID) + (1 | Item),
+  data = dat1)
+
+RPD3C <- lmer(
+  log_RPD ~ Condition + (1 | ID) + (1 | Item),
+  data = dat1)
+
+RPD4C <- lmer(
+  log_RPD ~ Condition + (1 | ID),
+  data = dat1)
+
+RPD5C <- lmer(
+  log_RPD ~ Condition + (1 | Item),
+  data = dat1)
+
+anova(RPD1C, RPD2C, RPD3C, RPD4C, RPD5C)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(RPD1C)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
