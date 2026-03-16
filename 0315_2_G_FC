@@ -1,0 +1,1337 @@
+library(glmmTMB)
+library(DHARMa)
+library(MuMIn)
+library(tidyverse)
+library(insight)
+library(performance)
+library(broom.mixed)
+library(cv)
+
+setwd("/Users/yusukekuroki/Desktop/Eye_Tracking")
+dat1_bpp <- read.csv("RQ2_glosses.csv")
+dat1_bpp
+
+colnames(dat1_bpp)[colnames(dat1_bpp) == "AOI.selection"] <- "Condition" 
+colnames(dat1_bpp)[colnames(dat1_bpp) == "RECORDING_SESSION_LABEL"] <- "ID" 
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_LABEL"] <- "Item" 
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_SKIP"] <- "Skip"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_FIXATION_COUNT"] <- "FC"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_FIRST_FIXATION_DURATION"] <- "FFD"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_REGRESSION_PATH_DURATION"] <- "RPD"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_REREADING_TIME"] <- "RRT"
+colnames(dat1_bpp)[colnames(dat1_bpp) == "IA_REFIXATION_DURATION"] <- "RFD"
+
+dat1 <- dat1_bpp %>% 
+  mutate( 
+    Condition = relevel(as.factor(Condition), ref = "Neutral"),
+    ID = as.factor(ID), 
+    Item = as.factor(Item) 
+  )
+
+dat1$ERs<-scale(dat1$ER)
+dat1 <- na.omit(dat1[,c("FC","ERs","Condition","Arousal","Valence","ID","Item")])
+
+#FC1 = 3 fixed effects;　maximum random structure (3 variables as random slope for ID)
+FC1_1A1 <- glmmTMB(
+  FC ~ Condition + ERs + Arousal +
+    (1 + Condition + ERs + Arousal | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC1_1V1 <- glmmTMB(
+  FC ~ Condition + Arousal + Valence +
+    (1 + Condition + Arousal + Valence | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC1_1A2 <- glmmTMB(
+  FC ~ Condition + ERs + Arousal +
+    (1 + Condition + ERs + Arousal || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC1_1V2 <- glmmTMB(
+  FC ~ Condition + Arousal + Valence +
+    (1 + Condition + ERs + Arousal || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+anova(FC1_1A1, FC1_1V1, FC1_1A2, FC1_1V2)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Data: dat1
+Models:
+FC1_1A2: FC ~ Condition + ERs + Arousal + (1 + Condition + ERs + Arousal || , zi=~0, disp=~1
+FC1_1A2:     ID) + (1 | Item), zi=~0, disp=~1
+FC1_1V2: FC ~ Condition + Arousal + Valence + (1 + Condition + ERs + Arousal || , zi=~0, disp=~1
+FC1_1V2:     ID) + (1 | Item), zi=~0, disp=~1
+FC1_1A1: FC ~ Condition + ERs + Arousal + (1 + Condition + ERs + Arousal | , zi=~0, disp=~1
+FC1_1A1:     ID) + (1 | Item), zi=~0, disp=~1
+FC1_1V1: FC ~ Condition + Arousal + Valence + (1 + Condition + Arousal + , zi=~0, disp=~1
+FC1_1V1:     Valence | ID) + (1 | Item), zi=~0, disp=~1
+        Df    AIC  BIC  logLik deviance Chisq Chi Df Pr(>Chisq)
+FC1_1A2 12                                                     
+FC1_1V2 12 2752.6 2808 -1364.3   2728.6            0           
+FC1_1A1 22                                        10           
+FC1_1V1 22                                         0      
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#I selected FC1_1V2 as the best fitting model besed on its AIC value.
+#FC2 = 2 fixed effects; 2 variables as random slope for ID)
+
+FC2_1A <- glmmTMB(
+  FC ~ ERs + Arousal +
+    (1 + ERs + Arousal | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC2_2A <- glmmTMB(
+  FC ~ ERs + Arousal +
+    (1 + ERs + Arousal || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC2_3A <- glmmTMB(
+  FC ~ Condition + Arousal +
+    (1 + Condition + Arousal | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC2_4A <- glmmTMB(
+  FC ~ Condition + Arousal +
+    (1 + Condition + Arousal || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC2_1V <- glmmTMB(
+  FC ~ Arousal + Valence +
+    (1 + Arousal + Valence | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC2_2V <- glmmTMB(
+  FC ~ Arousal + Valence +
+    (1 + Arousal + Valence || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC2_3V <- glmmTMB(
+  FC ~ Condition + Valence +
+    (1 + Condition + Valence | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC2_4V <- glmmTMB(
+  FC ~ Condition + Valence +
+    (1 + Condition + Valence || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC2_5 <- glmmTMB(
+  FC ~ Condition + ERs +
+    (1 + Condition + ERs | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC2_6 <- glmmTMB(
+  FC ~ Condition + ERs +
+    (1 + Condition + ERs || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+anova(FC1_1V2, FC2_1A, FC2_2A, FC2_3A, FC2_4A, FC2_1V, FC2_2V, FC2_3V, FC2_4V, FC2_5, FC2_6)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; false convergence (8). See vignette('troubleshooting'), help('diagnose')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning messages:
+1: In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+2: In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; false convergence (8). See vignette('troubleshooting'), help('diagnose')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Data: dat1
+Models:
+FC2_2A: FC ~ ERs + Arousal + (1 + ERs + Arousal || ID) + (1 | Item), zi=~0, disp=~1
+FC2_2V: FC ~ Arousal + Valence + (1 + Arousal + Valence || ID) + (1 | , zi=~0, disp=~1
+FC2_2V:     Item), zi=~0, disp=~1
+FC2_4A: FC ~ Condition + Arousal + (1 + Condition + Arousal || ID) + , zi=~0, disp=~1
+FC2_4A:     (1 | Item), zi=~0, disp=~1
+FC2_4V: FC ~ Condition + Valence + (1 + Condition + Valence || ID) + , zi=~0, disp=~1
+FC2_4V:     (1 | Item), zi=~0, disp=~1
+FC2_6: FC ~ Condition + ERs + (1 + Condition + ERs || ID) + (1 | Item), zi=~0, disp=~1
+FC2_1A: FC ~ ERs + Arousal + (1 + ERs + Arousal | ID) + (1 | Item), zi=~0, disp=~1
+FC2_1V: FC ~ Arousal + Valence + (1 + Arousal + Valence | ID) + (1 | , zi=~0, disp=~1
+FC2_1V:     Item), zi=~0, disp=~1
+FC1_1V2: FC ~ Condition + Arousal + Valence + (1 + Condition + ERs + Arousal || , zi=~0, disp=~1
+FC1_1V2:     ID) + (1 | Item), zi=~0, disp=~1
+FC2_3A: FC ~ Condition + Arousal + (1 + Condition + Arousal | ID) + (1 | , zi=~0, disp=~1
+FC2_3A:     Item), zi=~0, disp=~1
+FC2_3V: FC ~ Condition + Valence + (1 + Condition + Valence | ID) + (1 | , zi=~0, disp=~1
+FC2_3V:     Item), zi=~0, disp=~1
+FC2_5: FC ~ Condition + ERs + (1 + Condition + ERs | ID) + (1 | Item), zi=~0, disp=~1
+        Df    AIC    BIC  logLik deviance   Chisq Chi Df Pr(>Chisq)   
+FC2_2A   8                                                            
+FC2_2V   8 2760.1 2797.0 -1372.1   2744.1              0              
+FC2_4A  10 2751.3 2797.5 -1365.7   2731.3 12.7868      2   0.001673 **
+FC2_4V  10                                             0              
+FC2_6   10 2743.7 2789.8 -1361.8   2723.7              0              
+FC2_1A  11                                             1              
+FC2_1V  11                                             0              
+FC1_1V2 12 2752.6 2808.0 -1364.3   2728.6              1              
+FC2_3A  16 2758.8 2832.6 -1363.4   2726.8  1.8343      4   0.766193   
+FC2_3V  16                                             0              
+FC2_5   16 2748.4 2822.2 -1358.2   2716.4              0              
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#I selected FC2_6 as the best fitting model besed on its AIC value.
+#FC3 = 3 fixed effects; 1 variable as random slope for ID)
+
+FC3_A1 <- glmmTMB(
+  FC ~ Condition + ERs + Arousal +
+    (1 + Condition | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+FC3_A2 <- glmmTMB(
+  FC ~ Condition + ERs + Arousal +
+    (1 + ERs | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC3_A3 <- glmmTMB(
+  FC ~ Condition + ERs + Arousal +
+    (1 + Arousal | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC3_V1 <- glmmTMB(
+  FC ~ Condition + Arousal + Valence +
+    (1 + Condition | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+FC3_V2 <- glmmTMB(
+  FC ~ Condition + Arousal + Valence +
+    (1 + Arousal | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC3_V3 <- glmmTMB(
+  FC ~ Condition + Arousal + Valence +
+    (1 + Valence | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+anova(FC2_6, FC3_A1, FC3_A2, FC3_A3, FC3_V1, FC3_V2, FC3_V3)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Data: dat1
+Models:
+FC2_6: FC ~ Condition + ERs + (1 + Condition + ERs || ID) + (1 | Item), zi=~0, disp=~1
+FC3_A2: FC ~ Condition + ERs + Arousal + (1 + ERs | ID) + (1 | Item), zi=~0, disp=~1
+FC3_A3: FC ~ Condition + ERs + Arousal + (1 + Arousal | ID) + (1 | Item), zi=~0, disp=~1
+FC3_V2: FC ~ Condition + Arousal + Valence + (1 + Arousal | ID) + (1 | , zi=~0, disp=~1
+FC3_V2:     Item), zi=~0, disp=~1
+FC3_V3: FC ~ Condition + Arousal + Valence + (1 + Valence | ID) + (1 | , zi=~0, disp=~1
+FC3_V3:     Item), zi=~0, disp=~1
+FC3_A1: FC ~ Condition + ERs + Arousal + (1 + Condition | ID) + (1 | , zi=~0, disp=~1
+FC3_A1:     Item), zi=~0, disp=~1
+FC3_V1: FC ~ Condition + Arousal + Valence + (1 + Condition | ID) + (1 | , zi=~0, disp=~1
+FC3_V1:     Item), zi=~0, disp=~1
+       Df    AIC    BIC  logLik deviance   Chisq Chi Df Pr(>Chisq)    
+FC2_6  10 2743.7 2789.8 -1361.8   2723.7                              
+FC3_A2 10 2746.8 2792.9 -1363.4   2726.8  0.0000      0   1.000000    
+FC3_A3 10                                             0               
+FC3_V2 10 2760.6 2806.7 -1370.3   2740.6              0               
+FC3_V3 10 2758.7 2804.8 -1369.3   2738.7  1.8896      0  < 2.2e-16 ***
+FC3_A1 13 2748.9 2808.9 -1361.5   2722.9 15.7533      3   0.001274 ** 
+FC3_V1 13                                             0               
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#I selected FC2_6 as the best fitting model besed on its AIC value again.
+#FC4 = 2 fixed effects; 1 variable as random slope for ID)
+
+FC4_A1 <- glmmTMB(
+  FC ~ Condition + Arousal +
+    (1 + Condition | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_A2 <- glmmTMB(
+  FC ~ Condition + ERs + 
+    (1 + Condition | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_A3 <- glmmTMB(
+  FC ~ Condition + Arousal +
+    (1 + Arousal | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_A4 <- glmmTMB(
+  FC ~ ERs + Arousal +
+    (1 + Arousal | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+FC4_A5 <- glmmTMB(
+  FC ~ Condition + ERs +
+    (1 + ERs | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_A6 <- glmmTMB(
+  FC ~ ERs + Arousal +
+    (1 + ERs| ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_A7 <- glmmTMB(
+  FC ~ Condition + Arousal +
+    (1 + Condition || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_A8 <- glmmTMB(
+  FC ~ Condition + ERs + 
+    (1 + Condition || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_A9 <- glmmTMB(
+  FC ~ Condition + Arousal +
+    (1 + Arousal || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_A10 <- glmmTMB(
+  FC ~ ERs + Arousal +
+    (1 + Arousal || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+FC4_A11 <- glmmTMB(
+  FC ~ Condition + ERs +
+    (1 + ERs || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_A12 <- glmmTMB(
+  FC ~ ERs + Arousal +
+    (1 + ERs|| ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_V1 <- glmmTMB(
+  FC ~ Condition + Valence +
+    (1 + Condition | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_V2 <- glmmTMB(
+  FC ~ Condition + ERs + 
+    (1 + Condition | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_V3 <- glmmTMB(
+  FC ~ Condition + Valence +
+    (1 + Valence | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_V4 <- glmmTMB(
+  FC ~ Arousal + Valence +
+    (1 + Valence | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+FC4_V5 <- glmmTMB(
+  FC ~ Condition + ERs +
+    (1 + ERs | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_V6 <- glmmTMB(
+  FC ~ Arousal + Valence +
+    (1 + Arousal| ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_V7 <- glmmTMB(
+  FC ~ Condition + Valence +
+    (1 + Condition || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_V8 <- glmmTMB(
+  FC ~ Condition + ERs + 
+    (1 + Condition || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_V9 <- glmmTMB(
+  FC ~ Condition + Valence +
+    (1 + Valence || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_V10 <- glmmTMB(
+  FC ~ Arousal + Valence +
+    (1 + Valence || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+FC4_V11 <- glmmTMB(
+  FC ~ Condition + ERs +
+    (1 + ERs || ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4_V12 <- glmmTMB(
+  FC ~ Arousal + Valence +
+    (1 + Arousal|| ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+anova(FC2_6, FC4_A1, FC4_A2, FC4_A3, FC4_A4, FC4_A5, FC4_A6, FC4_A7, FC4_A8, FC4_A9, FC4_A10, FC4_A11, FC4_A12, FC4_V1, FC4_V2, FC4_V3, FC4_V4, FC4_V5, FC4_V6, FC4_V7, FC4_V8, FC4_V9, FC4_V10, FC4_V11, FC4_V12)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; false convergence (8). See vignette('troubleshooting'), help('diagnose')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Data: dat1
+Models:
+FC4_A10: FC ~ ERs + Arousal + (1 + Arousal || ID) + (1 | Item), zi=~0, disp=~1
+FC4_A12: FC ~ ERs + Arousal + (1 + ERs || ID) + (1 | Item), zi=~0, disp=~1
+FC4_V10: FC ~ Arousal + Valence + (1 + Valence || ID) + (1 | Item), zi=~0, disp=~1
+FC4_V12: FC ~ Arousal + Valence + (1 + Arousal || ID) + (1 | Item), zi=~0, disp=~1
+FC4_A4: FC ~ ERs + Arousal + (1 + Arousal | ID) + (1 | Item), zi=~0, disp=~1
+FC4_A6: FC ~ ERs + Arousal + (1 + ERs | ID) + (1 | Item), zi=~0, disp=~1
+FC4_A9: FC ~ Condition + Arousal + (1 + Arousal || ID) + (1 | Item), zi=~0, disp=~1
+FC4_A11: FC ~ Condition + ERs + (1 + ERs || ID) + (1 | Item), zi=~0, disp=~1
+FC4_V4: FC ~ Arousal + Valence + (1 + Valence | ID) + (1 | Item), zi=~0, disp=~1
+FC4_V6: FC ~ Arousal + Valence + (1 + Arousal | ID) + (1 | Item), zi=~0, disp=~1
+FC4_V9: FC ~ Condition + Valence + (1 + Valence || ID) + (1 | Item), zi=~0, disp=~1
+FC4_V11: FC ~ Condition + ERs + (1 + ERs || ID) + (1 | Item), zi=~0, disp=~1
+FC4_A3: FC ~ Condition + Arousal + (1 + Arousal | ID) + (1 | Item), zi=~0, disp=~1
+FC4_A5: FC ~ Condition + ERs + (1 + ERs | ID) + (1 | Item), zi=~0, disp=~1
+FC4_A7: FC ~ Condition + Arousal + (1 + Condition || ID) + (1 | Item), zi=~0, disp=~1
+FC4_A8: FC ~ Condition + ERs + (1 + Condition || ID) + (1 | Item), zi=~0, disp=~1
+FC4_V3: FC ~ Condition + Valence + (1 + Valence | ID) + (1 | Item), zi=~0, disp=~1
+FC4_V5: FC ~ Condition + ERs + (1 + ERs | ID) + (1 | Item), zi=~0, disp=~1
+FC4_V7: FC ~ Condition + Valence + (1 + Condition || ID) + (1 | Item), zi=~0, disp=~1
+FC4_V8: FC ~ Condition + ERs + (1 + Condition || ID) + (1 | Item), zi=~0, disp=~1
+FC2_6: FC ~ Condition + ERs + (1 + Condition + ERs || ID) + (1 | Item), zi=~0, disp=~1
+FC4_A1: FC ~ Condition + Arousal + (1 + Condition | ID) + (1 | Item), zi=~0, disp=~1
+FC4_A2: FC ~ Condition + ERs + (1 + Condition | ID) + (1 | Item), zi=~0, disp=~1
+FC4_V1: FC ~ Condition + Valence + (1 + Condition | ID) + (1 | Item), zi=~0, disp=~1
+FC4_V2: FC ~ Condition + ERs + (1 + Condition | ID) + (1 | Item), zi=~0, disp=~1
+        Df    AIC    BIC  logLik deviance   Chisq Chi Df Pr(>Chisq)    
+FC4_A10  7 2755.3 2787.6 -1370.7   2741.3                              
+FC4_A12  7 2750.2 2782.5 -1368.1   2736.2  5.0719      0     <2e-16 ***
+FC4_V10  7                                             0               
+FC4_V12  7                                             0               
+FC4_A4   8 2757.3 2794.2 -1370.6   2741.3              1               
+FC4_A6   8 2750.7 2787.6 -1367.4   2734.7  6.5338      0     <2e-16 ***
+FC4_A9   8 2756.8 2793.7 -1370.4   2740.8  0.0000      0     1.0000    
+FC4_A11  8 2744.0 2780.9 -1364.0   2728.0 12.8067      0     <2e-16 ***
+FC4_V4   8                                             0               
+FC4_V6   8 2760.0 2796.9 -1372.0   2744.0              0               
+FC4_V9   8                                             0               
+FC4_V11  8 2744.0 2780.9 -1364.0   2728.0              0               
+FC4_A3   9                                             1               
+FC4_A5   9                                             0               
+FC4_A7   9 2749.9 2791.4 -1365.9   2731.9              0               
+FC4_A8   9 2743.1 2784.7 -1362.6   2725.1  6.7289      0     <2e-16 ***
+FC4_V3   9 2757.0 2798.5 -1369.5   2739.0  0.0000      0     1.0000    
+FC4_V5   9                                             0               
+FC4_V7   9                                             0               
+FC4_V8   9 2743.1 2784.7 -1362.6   2725.1              0               
+FC2_6   10 2743.7 2789.8 -1361.8   2723.7  1.4270      1     0.2323    
+FC4_A1  12 2752.6 2808.0 -1364.3   2728.6  0.0000      2     1.0000    
+FC4_A2  12 2747.0 2802.4 -1361.5   2723.0  5.6083      0     <2e-16 ***
+FC4_V1  12 2753.1 2808.5 -1364.6   2729.1  0.0000      0     1.0000    
+FC4_V2  12 2747.0 2802.4 -1361.5   2723.0  6.1329      0     <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+simFC4_V8 <- simulateResiduals(FC4_V8, n = 1000)
+plot(simFC4_V8)
+testDispersion(simFC4_V8)
+testZeroInflation(simFC4_V8)
+testOutliers(simFC4_V8)
+plotResiduals(simFC4_V8, form = dat1$ERs)
+plotResiduals(simFC4_V8, form = dat1$Condition)
+
+FC2_6sim <- simulateResiduals(FC2_6, n = 1000)
+plot(FC2_6sim)
+testDispersion(FC2_6sim)
+testZeroInflation(FC2_6sim)
+testOutliers(FC2_6sim)
+plotResiduals(FC2_6sim, form = dat1$ERs)
+plotResiduals(FC2_6sim, form = dat1$Condition)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	DHARMa nonparametric dispersion test via sd of residuals fitted vs.
+	simulated
+
+data:  simulationOutput
+dispersion = 0.95076, p-value = 0.74
+alternative hypothesis: two.sided
+
+
+	DHARMa zero-inflation test via comparison to expected zeros with
+	simulation under H0 = fitted model
+
+data:  simulationOutput
+ratioObsSim = 0.1283, p-value < 2.2e-16
+alternative hypothesis: two.sided
+
+
+	DHARMa outlier test based on exact binomial test with approximate
+	expectations
+
+data:  simFC4_V8
+outliers at both margin(s) = 3, observations = 745, p-value = 0.1881
+alternative hypothesis: true probability of success is not equal to 0.001998002
+95 percent confidence interval:
+ 0.0008312035 0.0117226782
+sample estimates:
+frequency of outliers (expected: 0.001998001998002 ) 
+                                         0.004026846 
+
+
+	DHARMa nonparametric dispersion test via sd of residuals fitted vs.
+	simulated
+
+data:  simulationOutput
+dispersion = 0.95717, p-value = 0.806
+alternative hypothesis: two.sided
+
+
+	DHARMa zero-inflation test via comparison to expected zeros with
+	simulation under H0 = fitted model
+
+data:  simulationOutput
+ratioObsSim = 0.12777, p-value < 2.2e-16
+alternative hypothesis: two.sided
+
+
+	DHARMa outlier test based on exact binomial test with approximate
+	expectations
+
+data:  FC2_6sim
+outliers at both margin(s) = 2, observations = 745, p-value = 0.6639
+alternative hypothesis: true probability of success is not equal to 0.001998002
+95 percent confidence interval:
+ 0.0003252786 0.0096636223
+sample estimates:
+frequency of outliers (expected: 0.001998001998002 ) 
+                                         0.002684564 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(cv(FC2_6, seed = 1575))
+summary(cv(FC4_V8, seed = 1575))
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+R RNG seed set to 1575
+10-Fold Cross Validation
+criterion: mse
+cross-validation criterion = 11.42791
+bias-adjusted cross-validation criterion = 11.17176
+95% CI for bias-adjusted CV criterion = (9.181757, 13.16175)
+full-sample criterion = 7.815037
+R RNG seed set to 1575
+10-Fold Cross Validation
+criterion: mse
+cross-validation criterion = 11.31591
+bias-adjusted cross-validation criterion = 11.07447
+95% CI for bias-adjusted CV criterion = (9.084252, 13.06468)
+full-sample criterion = 7.750521
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#I selected FC4_V8 as the best fitting model besed on its AIC value again.
+#FC5 = 2 fixed effects; no random slope for ID)
+
+FC5_A1 <- glmmTMB(
+  FC ~ Condition + Arousal +
+    (1 | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC5_A2 <- glmmTMB(
+  FC ~ Condition + ERs + 
+    (1 | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC5_A3 <- glmmTMB(
+  FC ~ ERs + Arousal +
+    (1 | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC5_V1 <- glmmTMB(
+  FC ~ Condition + Valence +
+    (1 | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC5_V2 <- glmmTMB(
+  FC ~ Valence + Arousal + 
+    (1 | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC5_V3 <- glmmTMB(
+  FC ~ Arousal + Condition +
+    (1 | ID) +
+    (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+anova (FC4_V8, FC5_A1, FC5_A2, FC5_A3, FC5_V1, FC5_V2, FC5_V3)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; false convergence (8). See vignette('troubleshooting'), help('diagnose')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; false convergence (8). See vignette('troubleshooting'), help('diagnose')
+Warning messages:
+1: In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+2: In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; false convergence (8). See vignette('troubleshooting'), help('diagnose')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Data: dat1
+Models:
+FC5_A3: FC ~ ERs + Arousal + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC5_V2: FC ~ Valence + Arousal + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC5_A1: FC ~ Condition + Arousal + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC5_A2: FC ~ Condition + ERs + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC5_V1: FC ~ Condition + Valence + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC5_V3: FC ~ Arousal + Condition + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC4_V8: FC ~ Condition + ERs + (1 + Condition || ID) + (1 | Item), zi=~0, disp=~1
+       Df    AIC    BIC  logLik deviance   Chisq Chi Df Pr(>Chisq)    
+FC5_A3  6 2756.8 2784.4 -1372.4   2744.8                              
+FC5_V2  6                                             0               
+FC5_A1  7 2760.0 2792.3 -1373.0   2746.0              1               
+FC5_A2  7 2750.5 2782.8 -1368.3   2736.5  9.4486      0  < 2.2e-16 ***
+FC5_V1  7                                             0               
+FC5_V3  7 2760.0 2792.3 -1373.0   2746.0              0               
+FC4_V8  9 2743.1 2784.7 -1362.6   2725.1 20.8382      2  2.986e-05 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#I selected FC4_V8 as the best fitting model besed on its AIC value again.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+FC1C <- glmmTMB(
+   FC ~ Condition + (1 + Condition| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+ FC2C <- glmmTMB(
+   FC ~ Condition + (1 + Condition|| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC3C<- glmmTMB(
+   FC ~ Condition + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC4C <- glmmTMB(
+   FC~ Condition + (1 | ID),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC5C <- glmmTMB(
+   FC ~ Condition + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+FC1ER <- glmmTMB(
+   FC ~ ERs + (1 + ERs| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+ FC2ER <- glmmTMB(
+   FC ~ ERs + (1 + ERs|| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC3ER<- glmmTMB(
+   FC ~ ERs + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC4ER <- glmmTMB(
+   FC~ ERs + (1 | ID),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC5ER <- glmmTMB(
+   FC ~ ERs + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+FC1Valence <- glmmTMB(
+   FC ~ Valence + (1 + Valence| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+ FC2Valence <- glmmTMB(
+   FC ~ Valence + (1 + Valence|| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC3Valence<- glmmTMB(
+   FC ~ Valence + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC4Valence <- glmmTMB(
+   FC~ Valence + (1 | ID),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC5Valence <- glmmTMB(
+   FC ~ Valence + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+FC1Arousal <- glmmTMB(
+   FC ~ Arousal + (1 + Arousal| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+ FC2Arousal <- glmmTMB(
+   FC ~ Arousal + (1 + Arousal|| ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC3Arousal<- glmmTMB(
+   FC ~ Arousal + (1 | ID) + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC4Arousal <- glmmTMB(
+   FC~ Arousal + (1 | ID),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+ 
+ FC5Arousal <- glmmTMB(
+   FC ~ Arousal + (1 | Item),
+   data = dat1,
+   family = nbinom2(link = "log")
+ )
+
+anova(FC4_V8, FC1C,FC2C,FC3C,FC4C,FC5C,FC1ER,FC2ER,FC3ER,FC4ER,FC5ER, FC1Valence,FC2Valence,FC3Valence,FC4Valence,FC5Valence, FC1Arousal,FC2Arousal,FC3Arousal,FC4Arousal,FC5Arousal)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Warning message:
+In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+Data: dat1
+Models:
+FC4ER: FC ~ ERs + (1 | ID), zi=~0, disp=~1
+FC5ER: FC ~ ERs + (1 | Item), zi=~0, disp=~1
+FC4Valence: FC ~ Valence + (1 | ID), zi=~0, disp=~1
+FC5Valence: FC ~ Valence + (1 | Item), zi=~0, disp=~1
+FC4Arousal: FC ~ Arousal + (1 | ID), zi=~0, disp=~1
+FC5Arousal: FC ~ Arousal + (1 | Item), zi=~0, disp=~1
+FC4C: FC ~ Condition + (1 | ID), zi=~0, disp=~1
+FC5C: FC ~ Condition + (1 | Item), zi=~0, disp=~1
+FC3ER: FC ~ ERs + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC3Valence: FC ~ Valence + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC3Arousal: FC ~ Arousal + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC3C: FC ~ Condition + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC2ER: FC ~ ERs + (1 + ERs || ID) + (1 | Item), zi=~0, disp=~1
+FC2Valence: FC ~ Valence + (1 + Valence || ID) + (1 | Item), zi=~0, disp=~1
+FC2Arousal: FC ~ Arousal + (1 + Arousal || ID) + (1 | Item), zi=~0, disp=~1
+FC1ER: FC ~ ERs + (1 + ERs | ID) + (1 | Item), zi=~0, disp=~1
+FC1Valence: FC ~ Valence + (1 + Valence | ID) + (1 | Item), zi=~0, disp=~1
+FC1Arousal: FC ~ Arousal + (1 + Arousal | ID) + (1 | Item), zi=~0, disp=~1
+FC2C: FC ~ Condition + (1 + Condition || ID) + (1 | Item), zi=~0, disp=~1
+FC4_V8: FC ~ Condition + ERs + (1 + Condition || ID) + (1 | Item), zi=~0, disp=~1
+FC1C: FC ~ Condition + (1 + Condition | ID) + (1 | Item), zi=~0, disp=~1
+           Df    AIC    BIC  logLik deviance    Chisq Chi Df Pr(>Chisq)    
+FC4ER       4 2801.0 2819.4 -1396.5   2793.0                               
+FC5ER       4 2874.9 2893.3 -1433.5   2866.9   0.0000      0   1.000000    
+FC4Valence  4 2798.2 2816.6 -1395.1   2790.2  76.7305      0  < 2.2e-16 ***
+FC5Valence  4 2882.8 2901.2 -1437.4   2874.8   0.0000      0   1.000000    
+FC4Arousal  4 2800.6 2819.0 -1396.3   2792.6  82.2087      0  < 2.2e-16 ***
+FC5Arousal  4 2881.1 2899.6 -1436.6   2873.1   0.0000      0   1.000000    
+FC4C        5 2788.8 2811.8 -1389.4   2778.8  94.3834      1  < 2.2e-16 ***
+FC5C        5 2881.8 2904.9 -1435.9   2871.8   0.0000      0   1.000000    
+FC3ER       5 2754.8 2777.8 -1372.4   2744.8 127.0657      0  < 2.2e-16 ***
+FC3Valence  5 2759.6 2782.7 -1374.8   2749.6   0.0000      0   1.000000    
+FC3Arousal  5 2759.2 2782.3 -1374.6   2749.2   0.4012      0  < 2.2e-16 ***
+FC3C        6 2758.4 2786.1 -1373.2   2746.4   2.7919      1   0.094743 .  
+FC2ER       6 2748.2 2775.9 -1368.1   2736.2  10.1889      0  < 2.2e-16 ***
+FC2Valence  6 2761.5 2789.2 -1374.8   2749.5   0.0000      0   1.000000    
+FC2Arousal  6 2756.3 2784.0 -1372.2   2744.3   5.1973      0  < 2.2e-16 ***
+FC1ER       7                                              1               
+FC1Valence  7 2756.6 2788.9 -1371.3   2742.6               0               
+FC1Arousal  7                                              0               
+FC2C        8 2748.8 2785.8 -1366.4   2732.8               1               
+FC4_V8      9 2743.1 2784.7 -1362.6   2725.1   7.7273      1   0.005439 ** 
+FC1C       11                                              2               
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#I selected FC4_V8 as the best fitting model besed on its AIC value again.
+summary(FC4_V8)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ Family: nbinom2  ( log )
+Formula:          FC ~ Condition + ERs + (1 + Condition || ID) + (1 | Item)
+Data: dat1
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   2743.1    2784.6   -1362.6    2725.1       736 
+
+Random effects:
+
+Conditional model:
+ Groups Name              Variance Std.Dev.
+ ID     (Intercept)       0.07660  0.2768  
+        ConditionNegative 0.05918  0.2433  
+        ConditionPositive 0.04209  0.2052  
+ Item   (Intercept)       0.02886  0.1699  
+Number of obs: 745, groups:  ID, 42; Item, 18
+
+Dispersion parameter for nbinom2 family (): 4.72e+07 
+
+Conditional model:
+                  Estimate Std. Error z value Pr(>|z|)    
+(Intercept)        1.03869    0.09028  11.505  < 2e-16 ***
+ConditionNegative  0.08948    0.13118   0.682  0.49516    
+ConditionPositive -0.31061    0.12239  -2.538  0.01115 *  
+ERs                0.13918    0.04993   2.788  0.00531 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+b <- fixef(FC4_V8)$cond
+ci <- confint(FC4_V8, parm = "beta_", method = "Wald")
+IRR_table <- exp(ci)
+round(IRR_table, 3)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                  2.5 % 97.5 % Estimate
+(Intercept)       2.367  3.372    2.826
+ConditionNegative 0.846  1.414    1.094
+ConditionPositive 0.577  0.932    0.733
+ERs               1.042  1.267    1.149
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+simFC4_V8 <- simulateResiduals(FC4_V8, n = 1000)
+plot(simFC4_V8)
+testDispersion(simFC4_V8)
+testZeroInflation(simFC4_V8)
+testOutliers(simFC4_V8)
+plotResiduals(simFC4_V8, form = dat1$ERs)
+plotResiduals(simFC4_V8, form = dat1$Condition)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	DHARMa nonparametric dispersion test via sd of residuals fitted vs. simulated
+
+data:  simulationOutput
+dispersion = 0.95076, p-value = 0.74
+alternative hypothesis: two.sided
+
+
+	DHARMa zero-inflation test via comparison to expected zeros with simulation under H0 = fitted model
+
+data:  simulationOutput
+ratioObsSim = 0.1283, p-value < 2.2e-16
+alternative hypothesis: two.sided
+
+
+	DHARMa outlier test based on exact binomial test with approximate expectations
+
+data:  simFC4_V8
+outliers at both margin(s) = 3, observations = 745, p-value = 0.1881
+alternative hypothesis: true probability of success is not equal to 0.001998002
+95 percent confidence interval:
+ 0.0008312035 0.0117226782
+sample estimates:
+frequency of outliers (expected: 0.001998001998002 ) 
+                                         0.004026846 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(cv(FC4_V8, seed = 1575))
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+R RNG seed set to 1575
+10-Fold Cross Validation
+criterion: mse
+cross-validation criterion = 2.809011
+bias-adjusted cross-validation criterion = 2.750303
+95% CI for bias-adjusted CV criterion = (2.186237, 3.314369)
+full-sample criterion = 2.141875
+Warning messages:
+1: In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+2: In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; false convergence (8). See vignette('troubleshooting'), help('diagnose')
+3: In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+4: In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+5: In finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old) :
+  Model convergence problem; false convergence (8). See vignette('troubleshooting'), help('diagnose')
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+r2(FC4_V8)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# R2 for Mixed Models
+
+  Conditional R2: 0.335
+     Marginal R2: 0.035
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+betas <- fixef(FC4_V8)$cond
+IRRs <- exp(betas)
+IRRs
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      (Intercept) ConditionNegative ConditionPositive               ERs 
+        2.8255158         1.0936063         0.7330006         1.1493341 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+get_variance(FC4_V8)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+$var.fixed
+[1] 0.01620121
+
+$var.random
+[1] 0.1394133
+
+$var.residual
+[1] 0.3085144
+
+$var.distribution
+[1] 0.3085144
+
+$var.dispersion
+[1] 0
+
+$var.intercept
+        ID       Item 
+0.07659791 0.02886436 
+
+$var.slope
+ID.ConditionNegative ID.ConditionPositive 
+          0.05918018           0.04209389 
+
+$cor.slope_intercept
+ID.ConditionNegative ID.ConditionPositive 
+                   0                    0 
+
+$cor.slopes
+ID.ConditionNegative-ConditionPositive 
+                                     0 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+icc(FC4_V8)
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Intraclass Correlation Coefficient
+
+    Adjusted ICC: 0.311
+  Unadjusted ICC: 0.300
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+library(buildmer)
+ buildglmmTMB(
+    FC ~ Condition + ERs + Arousal +
+      (1 + Condition + ERs + Arousal | ID) +
+      (1 | Item),
+    data = dat1,
+    family = nbinom2(link = "log"),
+    buildmerControl = buildmerControl (crit = "AIC")
+  )
+
+ buildglmmTMB(
+    FC ~ Condition + Arousal + Valence +
+      (1 + Condition + Arousal + Valence | ID) +
+      (1 | Item),
+    data = dat1,
+    family = nbinom2(link = "log"),
+    buildmerControl = buildmerControl (crit = "AIC")
+  )
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Determining predictor order
+Fitting via glmmTMB, with ML: FC ~ 1
+Currently evaluating AIC for: Condition, ERs, Arousal
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition
+Fitting via glmmTMB, with ML: FC ~ 1 + ERs
+Fitting via glmmTMB, with ML: FC ~ 1 + Arousal
+Updating formula: FC ~ 1 + Condition
+Currently evaluating AIC for: ERs, Arousal
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition + ERs
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition + Arousal
+Updating formula: FC ~ 1 + Condition + ERs
+Currently evaluating AIC for: Arousal
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition + ERs + Arousal
+Updating formula: FC ~ 1 + Condition + ERs + Arousal
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal
+Currently evaluating AIC for: 1 | ID, 1 | Item
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 | ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 | Item)
+Updating formula: FC ~ 1 + Condition + ERs + Arousal + (1 | ID)
+Currently evaluating AIC for: Condition | ID, ERs | ID, Arousal | ID, 1 | Item
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + Condition | ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs | ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + Arousal | ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 | ID) + (1 | Item)
+Updating formula: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs | ID)
+Currently evaluating AIC for: Condition | ID, Arousal | ID, 1 | Item
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Condition | ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Arousal | ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs | ID) + (1 | Item)
+Updating formula: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs | ID) + (1 | Item)
+Currently evaluating AIC for: Condition | ID, Arousal | ID
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Condition | ID) + (1
+    | Item)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Arousal | ID) + (1 |
+    Item)
+Updating formula: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Condition | ID) + (1 | Item)
+Currently evaluating AIC for: Arousal | ID
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Condition + Arousal
+    | ID) + (1 | Item)
+Updating formula: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Condition + Arousal | ID) + (1 |
+    Item)
+Fitting ML and REML reference models
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Condition + Arousal
+    | ID) + (1 | Item)
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Condition + Arousal |
+    ID) + (1 | Item)
+Testing terms
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + Condition + Arousal | ID)
+    + (1 | Item)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Condition + Arousal
+    | ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Arousal | ID) + (1 |
+    Item)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Condition | ID) + (1
+    | Item)
+  grouping      term           block       score Iteration     AIC
+1     <NA>         1         NA NA 1          NA         1      NA
+2     <NA> Condition NA NA Condition   -8.141146         1      NA
+3     <NA>       ERs       NA NA ERs  -11.898192         1      NA
+4     <NA>   Arousal   NA NA Arousal    1.508084         1      NA
+5       ID         1         NA ID 1 -109.125327         1      NA
+7       ID       ERs       NA ID ERs   -6.314774         1     NaN
+9     Item         1       NA Item 1  -34.174160         1     NaN
+6       ID Condition NA ID Condition    2.835899         1     NaN
+8       ID   Arousal   NA ID Arousal    6.950760         1 6.95076
+Updating formula: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Condition | ID) + (1 | Item)
+Fitting ML and REML reference models
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Condition | ID) + (1
+    | Item)
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Condition | ID) + (1 |
+    Item)
+Testing terms
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition + ERs + (1 + ERs + Condition | ID) + (1 | Item)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + Condition | ID) + (1 |
+    Item)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs + Condition | ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs | ID) + (1 | Item)
+  grouping      term           block       score Iteration        AIC
+1     <NA>         1         NA NA 1          NA         2         NA
+2     <NA> Condition NA NA Condition   -8.141146         2         NA
+3     <NA>       ERs       NA NA ERs  -11.898192         2         NA
+4     <NA>   Arousal   NA NA Arousal    1.508084         2   1.998235
+5       ID         1         NA ID 1 -109.125327         2         NA
+7       ID       ERs       NA ID ERs   -6.314774         2   1.161852
+9     Item         1       NA Item 1  -34.174160         2 -33.410280
+6       ID Condition NA ID Condition    2.835899         2   2.835899
+Updating formula: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs | ID) + (1 | Item)
+Fitting ML and REML reference models
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs | ID) + (1 | Item)
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs | ID) + (1 | Item)
+Testing terms
+Fitting via glmmTMB, with ML: FC ~ 1 + ERs + Arousal + (1 + ERs | ID) + (1 | Item)
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition + ERs + (1 + ERs | ID) + (1 | Item)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 | ID) + (1 | Item)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + ERs + Arousal + (1 + ERs | ID)
+  grouping      term           block       score Iteration        AIC
+1     <NA>         1         NA NA 1          NA         3         NA
+2     <NA> Condition NA NA Condition   -8.141146         3  -3.968522
+3     <NA>       ERs       NA NA ERs  -11.898192         3         NA
+4     <NA>   Arousal   NA NA Arousal    1.508084         3        NaN
+5       ID         1         NA ID 1 -109.125327         3         NA
+7       ID       ERs       NA ID ERs   -6.314774         3        NaN
+9     Item         1       NA Item 1  -34.174160         3 -34.174160
+All terms are significant
+Formula:          FC ~ 1 + Condition + ERs + Arousal + (1 + ERs | ID) + (1 | Item)
+Data: dat1
+      AIC       BIC    logLik -2*log(L)  df.resid 
+ 2766.295  2812.429 -1373.148  2746.295       735 
+Random-effects (co)variances:
+
+Conditional model:
+ Groups Name        Std.Dev. Corr  
+ ID     (Intercept) 0.2982         
+        ERs         0.1248   -0.32 
+ Item   (Intercept) 0.1868         
+
+Number of obs: 745 / Conditional model: ID, 42; Item, 18
+
+Dispersion parameter for nbinom2 family (): 9.93e+06 
+
+Fixed Effects:
+
+Conditional model:
+      (Intercept)  ConditionNegative  ConditionPositive                ERs            Arousal  
+         1.031235           0.093686          -0.289055           0.129205           0.002795  
+Determining predictor order
+Fitting via glmmTMB, with ML: FC ~ 1
+Currently evaluating AIC for: Condition, Arousal, Valence
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition
+Fitting via glmmTMB, with ML: FC ~ 1 + Arousal
+Fitting via glmmTMB, with ML: FC ~ 1 + Valence
+Updating formula: FC ~ 1 + Condition
+Currently evaluating AIC for: Arousal, Valence
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition + Arousal
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition + Valence
+Updating formula: FC ~ 1 + Condition + Arousal
+Currently evaluating AIC for: Valence
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition + Arousal + Valence
+Updating formula: FC ~ 1 + Condition + Arousal + Valence
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence
+Currently evaluating AIC for: 1 | ID, 1 | Item
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 | ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 | Item)
+Updating formula: FC ~ 1 + Condition + Arousal + Valence + (1 | ID)
+Currently evaluating AIC for: Condition | ID, Arousal | ID, Valence | ID, 1 | Item
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 + Condition | ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 + Arousal | ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 + Valence | ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 | ID) + (1 | Item)
+Updating formula: FC ~ 1 + Condition + Arousal + Valence + (1 + Valence | ID)
+Currently evaluating AIC for: Condition | ID, Arousal | ID, 1 | Item
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 + Valence + Condition |
+    ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 + Valence + Arousal |
+    ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 + Valence | ID) + (1 |
+    Item)
+Updating formula: FC ~ 1 + Condition + Arousal + Valence + (1 + Valence + Condition | ID)
+Currently evaluating AIC for: Arousal | ID, 1 | Item
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 + Valence + Condition +
+    Arousal | ID)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 + Valence + Condition |
+    ID) + (1 | Item)
+Updating formula: FC ~ 1 + Condition + Arousal + Valence + (1 + Valence + Condition | ID) + (1 |
+    Item)
+Currently evaluating AIC for: Arousal | ID
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 + Valence + Condition +
+    Arousal | ID) + (1 | Item)
+Ending the ordering procedure due to having reached the maximal feasible model - all higher models
+    failed to converge. The types of convergence failure are: glmmTMB reports nonconvergence (1)
+Fitting ML and REML reference models
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 + Valence + Condition |
+    ID) + (1 | Item)
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition + Arousal + Valence + (1 + Valence + Condition |
+    ID) + (1 | Item)
+Testing terms
+Fitting via glmmTMB, with ML: FC ~ 1 + Condition + Valence + (1 + Valence + Condition | ID) + (1 |
+    Item)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 + Condition | ID) + (1 |
+    Item)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 + Valence | ID) + (1 |
+    Item)
+Fitting via glmmTMB, with REML: FC ~ 1 + Condition + Arousal + Valence + (1 + Valence + Condition |
+    ID)
+  grouping      term           block        score Iteration       AIC
+1     <NA>         1         NA NA 1           NA         1        NA
+2     <NA> Condition NA NA Condition   -8.1411463         1        NA
+3     <NA>   Arousal   NA NA Arousal   -0.2917405         1       NaN
+4     <NA>   Valence   NA NA Valence    0.8284719         1        NA
+5       ID         1         NA ID 1 -111.1399100         1        NA
+8       ID   Valence   NA ID Valence   -3.4817179         1       NaN
+6       ID Condition NA ID Condition    0.7311446         1       NaN
+9     Item         1       NA Item 1  -33.4610495         1 -33.46105
+All terms are significant
+Formula:          FC ~ 1 + Condition + Arousal + Valence + (1 + Valence + Condition |      ID) + (1 | Item)
+Data: dat1
+      AIC       BIC    logLik -2*log(L)  df.resid 
+ 2781.299  2859.726 -1373.649  2747.299       728 
+Random-effects (co)variances:
+
+Conditional model:
+ Groups Name              Std.Dev. Corr              
+ ID     (Intercept)       0.43404                    
+        Valence           0.03906  -0.72             
+        ConditionNegative 0.22703   0.08 -0.55       
+        ConditionPositive 0.34245   0.20 -0.78  0.42 
+ Item   (Intercept)       0.18563                    
+
+Number of obs: 745 / Conditional model: ID, 42; Item, 18
+
+Dispersion parameter for nbinom2 family (): 1.1e+11 
+
+Fixed Effects:
+
+Conditional model:
+      (Intercept)  ConditionNegative  ConditionPositive            Arousal            Valence  
+         1.061472          -0.017225          -0.209988          -0.008490           0.007348  
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
