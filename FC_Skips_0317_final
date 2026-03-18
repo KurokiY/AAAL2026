@@ -1,0 +1,338 @@
+dat1$ERs<-scale(dat1$ER)
+dat1 <- na.omit(dat1[,c("FC","ERs","Condition","Arousal","Valence","ID","Item")])
+
+FC1 <- glmmTMB(
+  FC ~ Condition + ERs + (1 + Condition + ERs | ID) + (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC2<- glmmTMB(
+  FC ~ Condition + ERs + (1 + Condition | ID) + (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC3<- glmmTMB(
+  FC ~ Condition + ERs + (1 + ERs | ID) + (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC4<- glmmTMB(
+  FC ~ Condition + ERs + (1 + Condition + ERs|| ID) + (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC5<- glmmTMB(
+  FC ~ Condition + ERs + (1 + Condition || ID) + (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC6<- glmmTMB(
+  FC ~ Condition + ERs + (1 + ERs || ID) + (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+FC7<- glmmTMB(
+  FC ~ Condition + ERs + (1 | ID) + (1 | Item),
+  data = dat1,
+  family = nbinom2(link = "log")
+)
+
+anova(FC1, FC2, FC3, FC4, FC5, FC6, FC7)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Data: dat1
+Models:
+FC7: FC ~ Condition + ERs + (1 | ID) + (1 | Item), zi=~0, disp=~1
+FC6: FC ~ Condition + ERs + (1 + ERs || ID) + (1 | Item), zi=~0, disp=~1
+FC3: FC ~ Condition + ERs + (1 + ERs | ID) + (1 | Item), zi=~0, disp=~1
+FC5: FC ~ Condition + ERs + (1 + Condition || ID) + (1 | Item), zi=~0, disp=~1
+FC4: FC ~ Condition + ERs + (1 + Condition + ERs || ID) + (1 | Item), zi=~0, disp=~1
+FC2: FC ~ Condition + ERs + (1 + Condition | ID) + (1 | Item), zi=~0, disp=~1
+FC1: FC ~ Condition + ERs + (1 + Condition + ERs | ID) + (1 | Item), zi=~0, disp=~1
+    Df    AIC    BIC  logLik deviance   Chisq Chi Df Pr(>Chisq)    
+FC7  7 3332.6 3364.9 -1659.3   3318.6                              
+FC6  8 3294.7 3331.6 -1639.3   3278.7 39.9361      1  2.624e-10 ***
+FC3  9 3295.2 3336.8 -1638.6   3277.2  1.4339      1   0.231121    
+FC5  9 3272.0 3313.5 -1627.0   3254.0 23.2654      0  < 2.2e-16 ***
+FC4 10 3270.5 3316.7 -1625.3   3250.5  3.4462      1   0.063396 .  
+FC2 12 3265.1 3320.4 -1620.5   3241.1  9.4545      2   0.008851 ** 
+FC1 16                                             4               
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> summary(FC2)
+ Family: nbinom2  ( log )
+Formula:          
+FC ~ Condition + ERs + (1 + Condition | ID) + (1 | Item)
+Data: dat1
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   3265.1    3320.4   -1620.5    3241.1       733 
+
+Random effects:
+
+Conditional model:
+ Groups Name              Variance Std.Dev. Corr        
+ ID     (Intercept)       0.15482  0.3935               
+        ConditionNegative 0.19478  0.4413   -0.55       
+        ConditionPositive 0.19925  0.4464   -0.45  0.54 
+ Item   (Intercept)       0.01694  0.1301               
+Number of obs: 745, groups:  ID, 42; Item, 18
+
+Dispersion parameter for nbinom2 family (): 8.66e+07 
+
+Conditional model:
+                  Estimate Std. Error z value Pr(>|z|)    
+(Intercept)        1.35756    0.08798  15.430   <2e-16 ***
+ConditionNegative  0.21147    0.12940   1.634    0.102    
+ConditionPositive -0.13736    0.11949  -1.150    0.250    
+ERs                0.13175    0.05709   2.308    0.021 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+simFC2 <- simulateResiduals(FC2, n = 1000)
+plot(simFC2)
+testDispersion(simFC2)
+testZeroInflation(simFC2)
+testOutliers(simFC2)
+plotResiduals(simFC2, form = dat1$ERs)
+plotResiduals(simFC2, form = dat1$Condition)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(cv(FC2_6, seed = 1575))
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+r2(FC2_6)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Effect size (incidence rare ratio)
+b <- fixef(FC2_6)$cond
+ci <- confint(FC2_6, parm = "beta_", method = "Wald")
+IRR_table <- exp(ci)
+round(IRR_table, 3)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+get_variance(FC2_6)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+icc(FC2_6)
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Skip1<- glmer(
+  Skip ~ Condition + ERs + (1 + Condition + ERs | ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+
+
+Skip2 <- glmer(
+  Skip ~ Condition + ERs + (1 + Condition | ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+
+Skip3<- glmer(
+  Skip ~ Condition + ERs + (1 + ERs | ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+
+
+Skip4 <- glmer(
+  Skip ~ Condition + ERs + (1 + Condition + ERs|| ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+
+Skip5<- glmer(
+  Skip ~ Condition + ERs + (1 + Condition || ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+
+
+Skip6 <- glmer(
+  Skip ~ Condition + ERs + (1 + ERs || ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+
+Skip7<- glmer(
+  Skip ~ Condition + ERs + (1 | ID) + (1 | Item),
+  data = dat1,
+  family = binomial(link = "logit"),
+   control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+ )
+
+anova(Skip1, Skip2, Skip3, Skip4, Skip5, Skip6, Skip7)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+boundary (singular) fit: see help('isSingular')
+boundary (singular) fit: see help('isSingular')
+boundary (singular) fit: see help('isSingular')
+boundary (singular) fit: see help('isSingular')
+boundary (singular) fit: see help('isSingular')
+Data: dat1
+Models:
+Skip7: Skip ~ Condition + ERs + (1 | ID) + (1 | Item)
+Skip6: Skip ~ Condition + ERs + (1 + ERs || ID) + (1 | Item)
+Skip3: Skip ~ Condition + ERs + (1 + ERs | ID) + (1 | Item)
+Skip2: Skip ~ Condition + ERs + (1 + Condition | ID) + (1 | Item)
+Skip5: Skip ~ Condition + ERs + (1 + Condition || ID) + (1 | Item)
+Skip4: Skip ~ Condition + ERs + (1 + Condition + ERs || ID) + (1 | Item)
+Skip1: Skip ~ Condition + ERs + (1 + Condition + ERs | ID) + (1 | Item)
+      npar    AIC    BIC  logLik -2*log(L)  Chisq Df Pr(>Chisq)
+Skip7    6 590.81 618.49 -289.41    578.81                     
+Skip6    7 591.61 623.90 -288.80    577.61 1.2028  1     0.2728
+Skip3    8 591.77 628.68 -287.89    575.77 1.8371  1     0.1753
+Skip2   11 591.60 642.35 -284.80    569.60 6.1684  3     0.1037
+Skip5   12 593.80 649.16 -284.90    569.80 0.0000  1     1.0000
+Skip4   13 595.80 655.77 -284.90    569.80 0.0000  1     1.0000
+Skip1   15 597.50 666.71 -283.75    567.50 2.2929  2     0.3178
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+isSingular(Skip7)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[1] FALSE
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+simSkip7 <- simulateResiduals(Skip7, n = 1000)
+plot(simSkip7)
+testDispersion(simSkip7)
+testZeroInflation(simSkip7)
+testOutliers(simSkip7)
+plotResiduals(simSkip7, form = dat1$ERs)
+plotResiduals(simSkip7, form = dat1$Condition)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	DHARMa nonparametric dispersion test via sd of residuals fitted vs. simulated
+
+data:  simulationOutput
+dispersion = 1.0077, p-value = 0.952
+alternative hypothesis: two.sided
+
+
+	DHARMa zero-inflation test via comparison to expected zeros with simulation under
+	H0 = fitted model
+
+data:  simulationOutput
+ratioObsSim = 0.99866, p-value = 0.97
+alternative hypothesis: two.sided
+
+
+	DHARMa outlier test based on exact binomial test with approximate expectations
+
+data:  simSkip7
+outliers at both margin(s) = 1, observations = 745, p-value = 1
+alternative hypothesis: true probability of success is not equal to 0.001998002
+95 percent confidence interval:
+ 3.398306e-05 7.455810e-03
+sample estimates:
+frequency of outliers (expected: 0.001998001998002 ) 0.001342282 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(Skip7)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+ Family: binomial  ( logit )
+Formula: Skip ~ Condition + ERs + (1 | ID) + (1 | Item)
+   Data: dat1
+Control: glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e+05))
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    590.8     618.5    -289.4     578.8       739 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.0869 -0.4190 -0.3109 -0.2176  4.3807 
+
+Random effects:
+ Groups Name        Variance Std.Dev.
+ ID     (Intercept) 0.4358   0.6602  
+ Item   (Intercept) 0.3269   0.5717  
+Number of obs: 745, groups:  ID, 42; Item, 18
+
+Fixed effects:
+                  Estimate Std. Error z value Pr(>|z|)    
+(Intercept)       -2.38372    0.33913  -7.029 2.08e-12 ***
+ConditionNegative  0.87824    0.48670   1.804 0.071156 .  
+ConditionPositive -0.01364    0.44592  -0.031 0.975598    
+ERs                0.68641    0.19243   3.567 0.000361 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+            (Intr) CndtnN CndtnP
+ConditnNgtv -0.654              
+ConditnPstv -0.588  0.313       
+ERs         -0.170  0.441 -0.291
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+summary(cv(Skip6, seed = 1575))
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+R RNG seed set to 1575
+10-Fold Cross Validation
+criterion: mse
+cross-validation criterion = 0.1170534
+bias-adjusted cross-validation criterion = 0.1157658
+95% CI for bias-adjusted CV criterion = (0.09870333, 0.1328283)
+full-sample criterion = 0.1014678
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+r2(Skip6)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# R2 for Mixed Models
+
+  Conditional R2: 0.227
+     Marginal R2: 0.056
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Effect size (incidence rare ratio)
+b <- fixef(Skip6)
+ci <- confint(Skip6, parm = "beta_", method = "Wald")
+IRR_table <- exp(ci)
+round(IRR_table, 3)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                  2.5 % 97.5 %
+(Intercept)       0.047  0.182
+ConditionNegative 0.874  6.254
+ConditionPositive 0.394  2.381
+ERs               1.311  2.987
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+get_variance(Skip6)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+$var.fixed
+[1] 0.2364984
+
+$var.random
+[1] 0.7284393
+
+$var.residual
+[1] 3.289868
+
+$var.distribution
+[1] 3.289868
+
+$var.dispersion
+[1] 0
+
+$var.intercept
+       ID      Item 
+0.3935016 0.3349377 
+
+$var.slope
+   ID.ERs 
+0.1040552 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+icc(Skip6)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Intraclass Correlation Coefficient
+
+    Adjusted ICC: 0.181
+  Unadjusted ICC: 0.171
