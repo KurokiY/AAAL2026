@@ -65,7 +65,12 @@ FC1 16                                             4
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> summary(FC2)
+
+STOOOOOOOOOOOOOP here!!!!
+
+
+summary(FC3)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  Family: nbinom2  ( log )
 Formula:          
 FC ~ Condition + ERs + (1 + Condition | ID) + (1 | Item)
@@ -95,6 +100,7 @@ ERs                0.13175    0.05709   2.308    0.021 *
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#model diagnostics: all the models had issues in residuals but I selected FC2 based on its AIC.
 simFC2 <- simulateResiduals(FC2, n = 1000)
 plot(simFC2)
 testDispersion(simFC2)
@@ -104,26 +110,55 @@ plotResiduals(simFC2, form = dat1$ERs)
 plotResiduals(simFC2, form = dat1$Condition)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+DHARMa nonparametric dispersion test via sd of residuals
+	fitted vs. simulated
+
+data:  simulationOutput
+dispersion = 0.9599, p-value = 0.864
+alternative hypothesis: two.sided
+
+
+	DHARMa zero-inflation test via comparison to expected zeros
+	with simulation under H0 = fitted model
+
+data:  simulationOutput
+ratioObsSim = 0.31565, p-value < 2.2e-16
+alternative hypothesis: two.sided
+
+
+	DHARMa outlier test based on exact binomial test with
+	approximate expectations
+
+data:  simFC2
+outliers at both margin(s) = 1, observations = 745, p-value =
+1
+alternative hypothesis: true probability of success is not equal to 0.001998002
+95 percent confidence interval:
+ 3.398306e-05 7.455810e-03
+sample estimates:
+frequency of outliers (expected: 0.001998001998002 ) 
+                                         0.001342282 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-summary(cv(FC2_6, seed = 1575))
+#10 fold cross validation
+summary(cv(FC3, seed = 1575))
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-r2(FC2_6)
+r2(FC2)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #Effect size (incidence rare ratio)
-b <- fixef(FC2_6)$cond
-ci <- confint(FC2_6, parm = "beta_", method = "Wald")
+b <- fixef(FC2)$cond
+ci <- confint(FC2, parm = "beta_", method = "Wald")
 IRR_table <- exp(ci)
 round(IRR_table, 3)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-get_variance(FC2_6)
+get_variance(FC2)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-icc(FC2_6)
+icc(FC2)
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Skip1<- glmer(
@@ -203,14 +238,19 @@ Skip5   12 593.80 649.16 -284.90    569.80 0.0000  1     1.0000
 Skip4   13 595.80 655.77 -284.90    569.80 0.0000  1     1.0000
 Skip1   15 597.50 666.71 -283.75    567.50 2.2929  2     0.3178
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Althogh the AIC for Skip7 was the lowest, potential issues were found on the model when I ran 10-fold cross-validation.
+I selected Skip6 in the end
 isSingular(Skip7)
 isSingular(Skip6)
 isSingular(Skip3)
+isSingular(Skip2)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 [1] FALSE
 [1] FALSE
 [1] TRUE
+[1] TRUE
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#model diagnostics
 simSkip7 <- simulateResiduals(Skip7, n = 1000)
 plot(simSkip7)
 testDispersion(simSkip7)
@@ -227,7 +267,6 @@ testOutliers(simSkip6)
 plotResiduals(simSkip6, form = dat1$ERs)
 plotResiduals(simSkip6, form = dat1$Condition)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 	DHARMa nonparametric dispersion test via sd of
 	residuals fitted vs. simulated
 
@@ -289,6 +328,10 @@ sample estimates:
 frequency of outliers (expected: 0.001998001998002 ) 
                                          0.002684564 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Issue here 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#10 fold cross-validation
 summary(cv(Skip7, seed = 1575))
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 R RNG seed set to 1575
@@ -304,6 +347,10 @@ Warning messages:
 2: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
   Model is nearly unidentifiable: very large eigenvalue
  - Rescale variables?
+
+
+I selected Skip6 as the best fitting model.
+
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 summary(cv(Skip6, seed = 1575))
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -355,22 +402,22 @@ ERs         -0.158  0.430 -0.286
 r2(Skip6)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # R2 for Mixed Models
-
   Conditional R2: 0.227
      Marginal R2: 0.056
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #Effect size (incidence rare ratio)
-b <- fixef(Skip6)
+b  <- fixef(Skip6)
 ci <- confint(Skip6, parm = "beta_", method = "Wald")
-IRR_table <- exp(ci)
+IRR_table <- exp(cbind(Estimate = b, ci))
 round(IRR_table, 3)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                  2.5 % 97.5 %
-(Intercept)       0.047  0.182
-ConditionNegative 0.874  6.254
-ConditionPositive 0.394  2.381
-ERs               1.311  2.987
+                  Estimate 2.5 % 97.5 %
+(Intercept)          0.092 0.047  0.182
+ConditionNegative    2.338 0.874  6.254
+ConditionPositive    0.969 0.394  2.381
+ERs                  1.979 1.311  2.987
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Variance
 get_variance(Skip6)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 $var.fixed
